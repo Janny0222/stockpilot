@@ -39,3 +39,4 @@ Thumbs.db
 
 # --- Tool state ---
 .remember/
+.claude/

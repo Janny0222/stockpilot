@@ -30,8 +30,19 @@ internal static class ApiServiceExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
 
-        services.AddControllers()
-            .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        // Strict numbers ("5" is not accepted as 5) and enums as strings ("Active", not 1).
+        // Set for both MVC (controllers) and the minimal-API options the OpenAPI generator reads,
+        // so the generated TypeScript types match what the API actually sends.
+        services.AddControllers().AddJsonOptions(o =>
+        {
+            o.JsonSerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+            o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+        services.ConfigureHttpJsonOptions(o =>
+        {
+            o.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+            o.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
         services.AddProblemDetails(o => o.CustomizeProblemDetails = ctx =>
         {

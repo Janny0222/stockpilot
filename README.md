@@ -3,8 +3,10 @@
 Multi-tenant **inventory & warehouse management SaaS** for small and medium businesses.
 ASP.NET Core 10 · Clean Architecture · EF Core + PostgreSQL · JWT with refresh-token rotation · React (coming in Phase 3).
 
-> **Status:** Phase 2 (backend foundation) complete: authentication, tenant isolation, roles and permissions,
-> auditing, structured logging, API docs, and 102 automated tests. See [docs/](docs/) for the plan and design notes.
+> **Status:** Phase 3 (frontend foundation) complete. Backend: authentication, tenant isolation, roles and
+> permissions, auditing, logging and API docs (102 tests). Frontend: design system, responsive app shell, every auth
+> flow, role-based navigation, and the Warehouses and Account pages on the real API (26 tests).
+> See [docs/](docs/) for the plan and design notes.
 
 ---
 
@@ -85,6 +87,28 @@ In Swagger: call `POST /api/v1/auth/login`, copy `accessToken`, click **Authoriz
 
 Emails (verification, password reset): with `Email:Provider=Log` (default in Development) they are printed to the
 console; with Docker's Mailpit they appear at **http://localhost:8025**.
+
+## Run the frontend
+
+Needs Node 24 (see `frontend/.nvmrc`) and the API running on port 5078.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open **http://localhost:5173**. In development the login page has one-click **Demo accounts** buttons.
+Vite proxies `/api` to the API, so the browser sees a single origin (the HttpOnly refresh cookie works the same way
+it will in production behind the Cloudflare Pages proxy).
+
+| Script | What it does |
+|---|---|
+| `npm run dev` | dev server with hot reload |
+| `npm test` | Vitest + Testing Library + MSW |
+| `npm run typecheck` / `npm run lint` | TypeScript and ESLint |
+| `npm run build` | production bundle in `dist/` |
+| `npm run gen:api` | regenerate `src/types/api.gen.ts` from the running API's OpenAPI document |
 
 ## Tests
 
