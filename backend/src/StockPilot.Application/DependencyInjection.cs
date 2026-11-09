@@ -19,6 +19,8 @@ public static class DependencyInjection
             services.AddScoped(type);
         }
 
+        services.AddScoped<Common.Security.PermissionChecker>();
+        services.AddScoped<Features.Catalog.PermissionCheckerAccessor>();
         services.AddScoped<Features.Warehouses.WarehouseAccessService>();
         services.AddScoped<Features.Auth.Common.AuthTokenIssuer>();
         services.AddScoped<Features.Auth.Common.AuthEmailService>();

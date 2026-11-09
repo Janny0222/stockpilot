@@ -15,6 +15,7 @@ internal sealed class HttpContextCurrentUser(IHttpContextAccessor accessor) : IC
 
     public Guid? UserId => ReadGuid(StockPilotClaims.UserId);
     public Guid? TenantId => ReadGuid(StockPilotClaims.TenantId);
+    public Guid? RoleId => ReadGuid(StockPilotClaims.RoleId);
     public bool IsAuthenticated => Context?.User.Identity?.IsAuthenticated == true;
     public string? IpAddress => Context?.Connection.RemoteIpAddress?.ToString();
     public string? UserAgent => Context?.Request.Headers.UserAgent.ToString();

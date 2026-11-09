@@ -21,7 +21,8 @@ export default defineConfig({
     // Same origin = the SameSite=Strict refresh cookie just works, exactly like production,
     // where a Cloudflare Pages Function plays this proxy role.
     proxy: {
-      '/api': { target: 'http://localhost:5078', changeOrigin: true },
+      // API_PROXY_TARGET lets you point the dev server at another API instance (e.g. a second port).
+      '/api': { target: process.env.API_PROXY_TARGET ?? 'http://localhost:5078', changeOrigin: true },
     },
   },
   test: {

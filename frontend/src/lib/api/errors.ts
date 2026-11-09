@@ -59,6 +59,21 @@ function defaultMessage(status: number) {
   return 'Something went wrong.'
 }
 
+/** "variants[0].sku" (server) → "variants.0.sku" (React Hook Form path). */
+export const toFormPath = (serverKey: string) => serverKey.replace(/\[(\d+)\]/g, '.$1')
+
+/**
+ * Applies EVERY server field error to the form (for forms with dynamic fields such as variant rows).
+ * Returns true when at least one was applied.
+ */
+export function applyAllFieldErrors<T extends FieldValues>(error: ApiError, setError: UseFormSetError<T>) {
+  const entries = Object.entries(error.fieldErrors).filter(([, messages]) => messages.length > 0)
+  for (const [key, messages] of entries) {
+    setError(toFormPath(key) as Path<T>, { type: 'server', message: messages[0] })
+  }
+  return entries.length > 0
+}
+
 /**
  * Pushes server-side validation errors onto the matching form fields, so a rule the server
  * enforces but the client doesn't (e.g. "email already taken") shows next to the right input.

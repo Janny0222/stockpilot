@@ -5,6 +5,7 @@ using Npgsql;
 using StockPilot.Application.Common.Abstractions;
 using StockPilot.Application.Common.Exceptions;
 using StockPilot.Domain.Auditing;
+using StockPilot.Domain.Catalog;
 using StockPilot.Domain.Common;
 using StockPilot.Domain.Identity;
 using StockPilot.Domain.Tenancy;
@@ -31,18 +32,41 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
     public DbSet<UserWarehouseAccess> UserWarehouseAccess => Set<UserWarehouseAccess>();
     public DbSet<Warehouse> Warehouses => Set<Warehouse>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+    public DbSet<ProductImage> ProductImages => Set<ProductImage>();
+    public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
 
     private static readonly Dictionary<string, (string Code, string Message)> UniqueConstraintMessages = new()
     {
         ["ix_users_email"] = ("EMAIL_TAKEN", "An account with this email already exists."),
         ["ix_tenants_slug"] = ("SLUG_TAKEN", "A company with this identifier already exists."),
         ["ix_warehouses_tenant_id_code"] = ("WAREHOUSE_CODE_TAKEN", "A warehouse with this code already exists."),
+        ["ix_product_variants_tenant_id_sku"] = ("SKU_TAKEN", "Another product already uses this SKU."),
+        ["ix_product_variants_tenant_id_barcode"] = ("BARCODE_TAKEN", "Another product already uses this barcode."),
+        ["ix_product_categories_tenant_id_parent_id_name"] = ("CATEGORY_NAME_TAKEN", "A category with this name already exists here."),
     };
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        ApplyClientGeneratedKeys(modelBuilder);
         ApplyTenantQueryFilters(modelBuilder);
+    }
+
+    /// <summary>
+    /// IDs are UUID v7 created in C# (Entity.Id), not by the database. Telling EF that matters: by default
+    /// EF assumes an entity that already has a key value is an EXISTING row, so a new child added to a
+    /// loaded parent (product.AddImage, product.AddVariant) would be tracked as Modified and saved as an
+    /// UPDATE of a row that doesn't exist. ValueGeneratedNever = "a key I haven't seen means a new row".
+    /// </summary>
+    private static void ApplyClientGeneratedKeys(ModelBuilder modelBuilder)
+    {
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes().Where(t => typeof(Entity).IsAssignableFrom(t.ClrType)))
+        {
+            modelBuilder.Entity(entityType.ClrType).Property(nameof(Entity.Id)).ValueGeneratedNever();
+        }
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) =>
@@ -64,6 +88,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
                 ? known
                 : ("DUPLICATE", "A record with the same unique value already exists.");
             throw new ConflictException(code, message);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // The row's xmin no longer matches the version the client loaded: someone else saved first.
+            throw new ConflictException("CONCURRENCY_CONFLICT", "This record was changed by someone else. Reload it and try again.");
         }
     }
 

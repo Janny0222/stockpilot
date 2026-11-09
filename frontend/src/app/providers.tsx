@@ -5,7 +5,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { toApiError } from '@/lib/api/errors'
 
 export function createQueryClient() {
-  return new QueryClient({
+  const client = new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 30_000, // data is "fresh" for 30s, so navigating back doesn't refetch instantly
@@ -18,6 +18,16 @@ export function createQueryClient() {
       },
     },
   })
+
+  // Image queries hold blob: URLs (see useProductImage). Free the memory when the cache evicts them.
+  client.getQueryCache().subscribe((event) => {
+    const data: unknown = event.query.state.data
+    if (event.type === 'removed' && typeof data === 'string' && data.startsWith('blob:')) {
+      URL.revokeObjectURL(data)
+    }
+  })
+
+  return client
 }
 
 export function Providers({ children }: { children: ReactNode }) {

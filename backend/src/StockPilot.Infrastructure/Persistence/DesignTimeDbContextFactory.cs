@@ -41,6 +41,7 @@ internal sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<A
     {
         public Guid? UserId => null;
         public Guid? TenantId => null;
+        public Guid? RoleId => null;
         public bool IsAuthenticated => false;
         public string? IpAddress => null;
         public string? UserAgent => null;

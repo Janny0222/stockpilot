@@ -12,6 +12,18 @@ export type RegisterCompanyCommand = Schemas['RegisterCompanyCommand']
 export type RegisterCompanyResult = Schemas['RegisterCompanyResult']
 export type SessionDto = Schemas['SessionDto']
 export type WarehouseDto = Schemas['WarehouseDto']
+
+export type ProductStatus = Schemas['ProductStatus']
+export type ProductListItemDto = Schemas['ProductListItemDto']
+export type ProductDetailDto = Schemas['ProductDetailDto']
+export type VariantDto = Schemas['VariantDto']
+export type ProductImageDto = Schemas['ProductImageDto']
+export type CategoryDto = Schemas['CategoryDto']
+export type CreateProductCommand = Schemas['CreateProductCommand']
+export type UpdateProductCommand = Schemas['UpdateProductCommand']
+export type VariantInput = Schemas['VariantInput']
+export type UpdateVariantCommand = Schemas['UpdateVariantCommand']
+export type SaveCategoryCommand = Schemas['SaveCategoryCommand']
 export type PagedResult<T> = {
   items: T[]
   page: number

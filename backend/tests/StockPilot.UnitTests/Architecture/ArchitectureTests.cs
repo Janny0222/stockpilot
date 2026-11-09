@@ -44,7 +44,7 @@ public sealed partial class ArchitectureTests
             @"Application\Features\Auth\",
             @"Application\Features\Platform\",
             @"Infrastructure\Identity\PermissionAndSessionServices.cs",
-            @"Infrastructure\Persistence\Seed\DatabaseInitializer.cs",
+            @"Infrastructure\Persistence\Seed\", // startup seeding: server-controlled, no user input
         ];
 
         var offenders = Directory

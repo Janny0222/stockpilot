@@ -28,7 +28,9 @@ internal sealed class AuditingInterceptor(ICurrentUser currentUser, TimeProvider
     ];
 
     // Entities that are logs/credentials themselves; auditing them is noise (or a leak).
-    private static readonly HashSet<Type> NotAudited = [typeof(AuditLog), typeof(RefreshToken), typeof(UserToken)];
+    // StoredFile holds raw image bytes: auditing it would copy megabytes into audit_logs.
+    private static readonly HashSet<Type> NotAudited =
+        [typeof(AuditLog), typeof(RefreshToken), typeof(UserToken), typeof(Domain.Catalog.StoredFile)];
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {

@@ -58,6 +58,7 @@ internal sealed class GlobalExceptionHandler(
         });
     }
 
+    /// <summary>"Variants[0].Sku" → "variants[0].sku": every segment camelCased, matching the JSON field names.</summary>
     private static string JsonNamingPolicyCamel(string name) =>
-        System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(name);
+        string.Join('.', name.Split('.').Select(System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName));
 }

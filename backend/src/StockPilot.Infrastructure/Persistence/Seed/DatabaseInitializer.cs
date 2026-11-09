@@ -68,8 +68,11 @@ public static class DatabaseInitializer
         AppDbContext db, IPasswordHasher hasher, IConfiguration config, ILogger logger, CancellationToken ct)
     {
         const string slug = "northwind-supply";
-        if (await db.Tenants.AnyAsync(t => t.Slug == slug, ct))
+        var existingId = await db.Tenants.Where(t => t.Slug == slug).Select(t => (Guid?)t.Id).SingleOrDefaultAsync(ct);
+        if (existingId is { } tenantId)
         {
+            // Company already exists: top up data added by later modules (idempotent).
+            await DemoCatalog.SeedAsync(db, tenantId, logger, ct);
             return;
         }
 
@@ -110,5 +113,7 @@ public static class DatabaseInitializer
 
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Seeded demo tenant '{Tenant}' with 4 users and 3 warehouses", tenant.Name);
+
+        await DemoCatalog.SeedAsync(db, tenant.Id, logger, ct);
     }
 }

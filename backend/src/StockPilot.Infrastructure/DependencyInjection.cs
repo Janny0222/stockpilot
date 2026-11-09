@@ -67,6 +67,10 @@ public static class DependencyInjection
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<ISessionValidator, SessionValidator>();
 
+        // ---- Files & images
+        services.AddScoped<IFileStorage, Storage.DatabaseFileStorage>();
+        services.AddSingleton<IImageProcessor, Storage.SkiaImageProcessor>();
+
         // ---- Email
         services.AddSingleton<SmtpEmailSender>();
         services.AddSingleton<LoggingEmailSender>();

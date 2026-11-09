@@ -3,7 +3,8 @@
 Multi-tenant **inventory & warehouse management SaaS** for small and medium businesses.
 ASP.NET Core 10 · Clean Architecture · EF Core + PostgreSQL · JWT with refresh-token rotation · React (coming in Phase 3).
 
-> **Status:** Phase 3 (frontend foundation) complete. Backend: authentication, tenant isolation, roles and
+> **Status:** Phase 4 in progress: **Products** module done (categories, variants, SKU/barcode, images, search).
+> Phase 3 (frontend foundation) complete. Backend: authentication, tenant isolation, roles and
 > permissions, auditing, logging and API docs (102 tests). Frontend: design system, responsive app shell, every auth
 > flow, role-based navigation, and the Warehouses and Account pages on the real API (26 tests).
 > See [docs/](docs/) for the plan and design notes.

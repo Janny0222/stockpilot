@@ -76,7 +76,7 @@ public sealed class RefreshSessionHandler(
         {
             await db.SaveChangesAsync(ct);
         }
-        catch (DbUpdateConcurrencyException)
+        catch (ConflictException ex) when (ex.Code == "CONCURRENCY_CONFLICT")
         {
             // Another request rotated this exact token a moment ago (xmin changed). Same as the grace case.
             throw Invalid();

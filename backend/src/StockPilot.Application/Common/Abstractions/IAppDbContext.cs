@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using StockPilot.Domain.Auditing;
+using StockPilot.Domain.Catalog;
 using StockPilot.Domain.Identity;
 using StockPilot.Domain.Tenancy;
 using StockPilot.Domain.Warehousing;
@@ -24,6 +26,17 @@ public interface IAppDbContext
     DbSet<UserWarehouseAccess> UserWarehouseAccess { get; }
     DbSet<Warehouse> Warehouses { get; }
     DbSet<AuditLog> AuditLogs { get; }
+    DbSet<ProductCategory> ProductCategories { get; }
+    DbSet<Product> Products { get; }
+    DbSet<ProductVariant> ProductVariants { get; }
+    DbSet<ProductImage> ProductImages { get; }
 
+    /// <summary>Change-tracking entry, used to apply a client's concurrency token before saving.</summary>
+    EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
+
+    /// <summary>
+    /// Saves all changes in one transaction. Translates database conflicts into application exceptions:
+    /// unique-index violations → ConflictException(code), stale concurrency tokens → ConflictException("CONCURRENCY_CONFLICT").
+    /// </summary>
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

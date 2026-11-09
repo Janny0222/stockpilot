@@ -4,6 +4,10 @@ import { CheckEmailPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage 
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { RegisterPage } from '@/features/auth/pages/register-page'
 import { DashboardPage } from '@/features/dashboard/dashboard-page'
+import { CategoriesPage } from '@/features/products/pages/categories-page'
+import { NewProductPage } from '@/features/products/pages/new-product-page'
+import { ProductDetailPage } from '@/features/products/pages/product-detail-page'
+import { ProductsPage } from '@/features/products/pages/products-page'
 import { WarehouseDetailPage } from '@/features/warehouses/pages/warehouse-detail-page'
 import { WarehousesPage } from '@/features/warehouses/pages/warehouses-page'
 import { Permissions as P } from '@/lib/permissions'
@@ -65,8 +69,17 @@ export const router = createBrowserRouter([
               { path: ':id', handle: crumb('Details'), element: <RequirePermission permission={P.Warehouses.View}><WarehouseDetailPage /></RequirePermission> },
             ],
           },
+          {
+            path: 'products',
+            handle: crumb('Products'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Products.View}><ProductsPage /></RequirePermission> },
+              { path: 'new', handle: crumb('New product'), element: <RequirePermission permission={P.Products.Manage}><NewProductPage /></RequirePermission> },
+              { path: 'categories', handle: crumb('Categories'), element: <RequirePermission permission={P.Products.View}><CategoriesPage /></RequirePermission> },
+              { path: ':id', handle: crumb('Details'), element: <RequirePermission permission={P.Products.View}><ProductDetailPage /></RequirePermission> },
+            ],
+          },
           { path: 'settings/account', handle: crumb('Account & sessions'), element: <AccountPage /> },
-          soon('products', 'Products', P.Products.View, 'Product catalogue with categories, variants, SKUs, barcodes and images.'),
           soon('inventory', 'Inventory', P.Inventory.View, 'Stock levels, stock-in and stock-out, adjustments, transfers and movement history.'),
           soon('purchases', 'Purchases', P.Purchases.View, 'Purchase orders from draft to approval to receiving, with partial deliveries.'),
           soon('sales', 'Sales', P.Sales.View, 'Sales orders with stock reservation and fulfilment.'),

@@ -26,7 +26,7 @@ export type NavItem = {
 
 export const tenantNav: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: P.Dashboard.View, available: true },
-  { to: '/products', label: 'Products', icon: Package, permission: P.Products.View, available: false },
+  { to: '/products', label: 'Products', icon: Package, permission: P.Products.View, available: true },
   { to: '/inventory', label: 'Inventory', icon: Boxes, permission: P.Inventory.View, available: false },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart, permission: P.Purchases.View, available: false },
   { to: '/sales', label: 'Sales', icon: Receipt, permission: P.Sales.View, available: false },
