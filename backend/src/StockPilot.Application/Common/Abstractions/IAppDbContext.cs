@@ -4,6 +4,7 @@ using StockPilot.Domain.Auditing;
 using StockPilot.Domain.Catalog;
 using StockPilot.Domain.Identity;
 using StockPilot.Domain.Inventory;
+using StockPilot.Domain.Purchasing;
 using StockPilot.Domain.Tenancy;
 using StockPilot.Domain.Warehousing;
 
@@ -35,6 +36,11 @@ public interface IAppDbContext
     DbSet<InventoryTransaction> InventoryTransactions { get; }
     DbSet<StockTransfer> StockTransfers { get; }
     DbSet<StockTransferItem> StockTransferItems { get; }
+    DbSet<Supplier> Suppliers { get; }
+    DbSet<PurchaseOrder> PurchaseOrders { get; }
+    DbSet<PurchaseOrderItem> PurchaseOrderItems { get; }
+    DbSet<PurchaseReceipt> PurchaseReceipts { get; }
+    DbSet<PurchaseReceiptItem> PurchaseReceiptItems { get; }
 
     /// <summary>
     /// Runs <paramref name="work"/> inside ONE database transaction, retrying the WHOLE unit of work on transient

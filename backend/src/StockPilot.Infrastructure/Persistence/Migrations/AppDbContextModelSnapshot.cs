@@ -1657,6 +1657,412 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("approved_at");
+
+                    b.Property<Guid?>("ApprovedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("approved_by");
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("cancel_reason");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("cancelled_at");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateOnly?>("ExpectedDate")
+                        .HasColumnType("date")
+                        .HasColumnName("expected_date");
+
+                    b.Property<DateTimeOffset?>("LastReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_received_at");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("number");
+
+                    b.Property<DateOnly>("OrderDate")
+                        .HasColumnType("date")
+                        .HasColumnName("order_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset?>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("submitted_at");
+
+                    b.Property<Guid?>("SubmittedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("submitted_by");
+
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("supplier_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("total");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<Guid>("WarehouseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("warehouse_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_purchase_orders");
+
+                    b.HasIndex("SupplierId")
+                        .HasDatabaseName("ix_purchase_orders_supplier_id");
+
+                    b.HasIndex("WarehouseId")
+                        .HasDatabaseName("ix_purchase_orders_warehouse_id");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_purchase_orders_tenant_id_number");
+
+                    b.HasIndex("TenantId", "SupplierId")
+                        .HasDatabaseName("ix_purchase_orders_tenant_id_supplier_id");
+
+                    b.HasIndex("TenantId", "Status", "OrderDate")
+                        .HasDatabaseName("ix_purchase_orders_tenant_id_status_order_date");
+
+                    b.ToTable("purchase_orders", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrderItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("line_total");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_variant_id");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("purchase_order_id");
+
+                    b.Property<decimal>("QuantityOrdered")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity_ordered");
+
+                    b.Property<decimal>("QuantityReceived")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity_received");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("unit_cost");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_purchase_order_items");
+
+                    b.HasIndex("ProductVariantId")
+                        .HasDatabaseName("ix_purchase_order_items_product_variant_id");
+
+                    b.HasIndex("PurchaseOrderId")
+                        .HasDatabaseName("ix_purchase_order_items_purchase_order_id");
+
+                    b.ToTable("purchase_order_items", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_purchase_order_items_received_le_ordered", "quantity_received <= quantity_ordered");
+                        });
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("PurchaseOrderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("purchase_order_id");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<Guid?>("ReceivedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("received_by");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("WarehouseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("warehouse_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_purchase_receipts");
+
+                    b.HasIndex("PurchaseOrderId")
+                        .HasDatabaseName("ix_purchase_receipts_purchase_order_id");
+
+                    b.HasIndex("WarehouseId")
+                        .HasDatabaseName("ix_purchase_receipts_warehouse_id");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_purchase_receipts_tenant_id_number");
+
+                    b.ToTable("purchase_receipts", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseReceiptItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_variant_id");
+
+                    b.Property<Guid>("PurchaseOrderItemId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("purchase_order_item_id");
+
+                    b.Property<Guid>("PurchaseReceiptId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("purchase_receipt_id");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("unit_cost");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_purchase_receipt_items");
+
+                    b.HasIndex("ProductVariantId")
+                        .HasDatabaseName("ix_purchase_receipt_items_product_variant_id");
+
+                    b.HasIndex("PurchaseOrderItemId")
+                        .HasDatabaseName("ix_purchase_receipt_items_purchase_order_item_id");
+
+                    b.HasIndex("PurchaseReceiptId")
+                        .HasDatabaseName("ix_purchase_receipt_items_purchase_receipt_id");
+
+                    b.ToTable("purchase_receipt_items", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.Supplier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("address");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("contact_name");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("email");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("notes");
+
+                    b.Property<int>("PaymentTermsDays")
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_terms_days");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("phone");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_suppliers");
+
+                    b.HasIndex("TenantId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_suppliers_tenant_id_code");
+
+                    b.HasIndex("TenantId", "Name")
+                        .HasDatabaseName("ix_suppliers_tenant_id_name");
+
+                    b.ToTable("suppliers", (string)null);
+                });
+
             modelBuilder.Entity("StockPilot.Domain.Tenancy.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2049,6 +2455,81 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_warehouse_stocks_warehouses_warehouse_id");
                 });
 
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrder", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Purchasing.Supplier", null)
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_orders_suppliers_supplier_id");
+
+                    b.HasOne("StockPilot.Domain.Warehousing.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_orders_warehouses_warehouse_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrderItem", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Catalog.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_order_items_product_variants_product_variant_id");
+
+                    b.HasOne("StockPilot.Domain.Purchasing.PurchaseOrder", null)
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_order_items_purchase_orders_purchase_order_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseReceipt", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Purchasing.PurchaseOrder", null)
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_receipts_purchase_orders_purchase_order_id");
+
+                    b.HasOne("StockPilot.Domain.Warehousing.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_receipts_warehouses_warehouse_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseReceiptItem", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Catalog.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_receipt_items_product_variants_product_variant_id");
+
+                    b.HasOne("StockPilot.Domain.Purchasing.PurchaseOrderItem", null)
+                        .WithMany()
+                        .HasForeignKey("PurchaseOrderItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_receipt_items_purchase_order_items_purchase_order_");
+
+                    b.HasOne("StockPilot.Domain.Purchasing.PurchaseReceipt", null)
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseReceiptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_purchase_receipt_items_purchase_receipts_purchase_receipt_id");
+                });
+
             modelBuilder.Entity("StockPilot.Domain.Warehousing.Warehouse", b =>
                 {
                     b.HasOne("StockPilot.Domain.Tenancy.Tenant", null)
@@ -2082,6 +2563,16 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("StockPilot.Domain.Inventory.StockTransfer", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrder", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseReceipt", b =>
                 {
                     b.Navigation("Items");
                 });

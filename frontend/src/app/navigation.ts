@@ -28,10 +28,10 @@ export const tenantNav: NavItem[] = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: P.Dashboard.View, available: true },
   { to: '/products', label: 'Products', icon: Package, permission: P.Products.View, available: true },
   { to: '/inventory', label: 'Inventory', icon: Boxes, permission: P.Inventory.View, available: true },
-  { to: '/purchases', label: 'Purchases', icon: ShoppingCart, permission: P.Purchases.View, available: false },
+  { to: '/purchases', label: 'Purchases', icon: ShoppingCart, permission: P.Purchases.View, available: true },
   { to: '/sales', label: 'Sales', icon: Receipt, permission: P.Sales.View, available: false },
   { to: '/warehouses', label: 'Warehouses', icon: Warehouse, permission: P.Warehouses.View, available: true },
-  { to: '/suppliers', label: 'Suppliers', icon: Truck, permission: P.Suppliers.View, available: false },
+  { to: '/suppliers', label: 'Suppliers', icon: Truck, permission: P.Suppliers.View, available: true },
   { to: '/reports', label: 'Reports', icon: ChartColumn, permission: P.Reports.View, available: false },
 ]
 

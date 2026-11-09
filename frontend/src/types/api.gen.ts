@@ -1503,6 +1503,507 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/suppliers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    IsActive?: boolean;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfSupplierDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveSupplierCommand"];
+                    "text/json": components["schemas"]["SaveSupplierCommand"];
+                    "application/*+json": components["schemas"]["SaveSupplierCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedIdResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/suppliers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SupplierDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveSupplierCommand"];
+                    "text/json": components["schemas"]["SaveSupplierCommand"];
+                    "application/*+json": components["schemas"]["SaveSupplierCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/suppliers/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/suppliers/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/purchase-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Status?: components["schemas"]["PurchaseOrderStatus"];
+                    SupplierId?: string;
+                    WarehouseId?: string;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfPurchaseOrderListItemDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SavePurchaseOrderCommand"];
+                    "text/json": components["schemas"]["SavePurchaseOrderCommand"];
+                    "application/*+json": components["schemas"]["SavePurchaseOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedIdResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/purchase-orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PurchaseOrderDetailDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SavePurchaseOrderCommand"];
+                    "text/json": components["schemas"]["SavePurchaseOrderCommand"];
+                    "application/*+json": components["schemas"]["SavePurchaseOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/purchase-orders/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/purchase-orders/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/purchase-orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelPurchaseOrderCommand"];
+                    "text/json": components["schemas"]["CancelPurchaseOrderCommand"];
+                    "application/*+json": components["schemas"]["CancelPurchaseOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/purchase-orders/{id}/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record a delivery (full or partial). Idempotent: a double-submitted delivery is applied once. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReceivePurchaseOrderCommand"];
+                    "text/json": components["schemas"]["ReceivePurchaseOrderCommand"];
+                    "application/*+json": components["schemas"]["ReceivePurchaseOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReceiptResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/warehouses": {
         parameters: {
             query?: never;
@@ -1776,6 +2277,9 @@ export interface components {
         };
         /** @enum {unknown} */
         AdjustmentReason: "CountCorrection" | "Damaged" | "Lost" | "Found" | "Expired" | "Other" | null;
+        CancelPurchaseOrderCommand: {
+            reason: string;
+        };
         CategoryDto: {
             /** Format: uuid */
             id: string;
@@ -1902,8 +2406,32 @@ export interface components {
             totalPages?: number;
         };
         /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfPurchaseOrderListItemDto: {
+            items: components["schemas"]["PurchaseOrderListItemDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfStockLevelDto: {
             items: components["schemas"]["StockLevelDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfSupplierDto: {
+            items: components["schemas"]["SupplierDto"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -2001,6 +2529,129 @@ export interface components {
         };
         /** @enum {unknown} */
         ProductStatus: "Active" | "Archived";
+        PurchaseLineInput: {
+            /** Format: uuid */
+            variantId: string;
+            /** Format: double */
+            quantity: number;
+            /** Format: double */
+            unitCost: number;
+        };
+        PurchaseOrderDetailDto: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            status: components["schemas"]["PurchaseOrderStatus"];
+            /** Format: uuid */
+            supplierId: string;
+            supplierName: string;
+            /** Format: uuid */
+            warehouseId: string;
+            warehouseName: string;
+            /** Format: date */
+            orderDate: string;
+            /** Format: date */
+            expectedDate: null | string;
+            notes: null | string;
+            /** Format: double */
+            total: null | number;
+            /** Format: uint32 */
+            version: number;
+            canViewCost: boolean;
+            createdBy: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            submittedAt: null | string;
+            /** Format: date-time */
+            approvedAt: null | string;
+            approvedBy: null | string;
+            /** Format: date-time */
+            cancelledAt: null | string;
+            cancelReason: null | string;
+            items: components["schemas"]["PurchaseOrderItemDto"][];
+            receipts: components["schemas"]["ReceiptDto"][];
+        };
+        PurchaseOrderItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            variantId: string;
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            sku: string;
+            variantName: null | string;
+            unitOfMeasure: string;
+            /** Format: double */
+            quantityOrdered: number;
+            /** Format: double */
+            quantityReceived: number;
+            /** Format: double */
+            quantityRemaining: number;
+            /** Format: double */
+            unitCost: null | number;
+            /** Format: double */
+            lineTotal: null | number;
+        };
+        PurchaseOrderListItemDto: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: uuid */
+            supplierId: string;
+            supplierName: string;
+            /** Format: uuid */
+            warehouseId: string;
+            warehouseCode: string;
+            status: components["schemas"]["PurchaseOrderStatus"];
+            /** Format: date */
+            orderDate: string;
+            /** Format: date */
+            expectedDate: null | string;
+            /** Format: int32 */
+            itemCount: number;
+            /** Format: double */
+            quantityOrdered: number;
+            /** Format: double */
+            quantityReceived: number;
+            /** Format: double */
+            total: null | number;
+        };
+        /** @enum {unknown} */
+        PurchaseOrderStatus: "Draft" | "Submitted" | "Approved" | "PartiallyReceived" | "Received" | "Cancelled";
+        ReceiptDto: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: date-time */
+            receivedAt: string;
+            receivedBy: null | string;
+            note: null | string;
+            items: components["schemas"]["ReceiptItemDto"][];
+        };
+        ReceiptItemDto: {
+            sku: string;
+            productName: string;
+            /** Format: double */
+            quantity: number;
+        };
+        ReceiptResult: {
+            /** Format: uuid */
+            receiptId: string;
+            receiptNumber: string;
+            status: components["schemas"]["PurchaseOrderStatus"];
+        };
+        ReceiveLineInput: {
+            /** Format: uuid */
+            itemId: string;
+            /** Format: double */
+            quantity: number;
+        };
+        ReceivePurchaseOrderCommand: {
+            lines: components["schemas"]["ReceiveLineInput"][];
+            note: null | string;
+        };
         /** @description Manual stock-in or stock-out of one or more variants in one warehouse. */
         RecordStockCommand: {
             /** Format: uuid */
@@ -2036,6 +2687,31 @@ export interface components {
             description: null | string;
             /** Format: uuid */
             parentId: null | string;
+        };
+        SavePurchaseOrderCommand: {
+            /** Format: uuid */
+            supplierId: string;
+            /** Format: uuid */
+            warehouseId: string;
+            /** Format: date */
+            orderDate: string;
+            /** Format: date */
+            expectedDate: null | string;
+            notes: null | string;
+            lines: components["schemas"]["PurchaseLineInput"][];
+            /** Format: uint32 */
+            version: null | number;
+        };
+        SaveSupplierCommand: {
+            code: string;
+            name: string;
+            contactName: null | string;
+            email: null | string;
+            phone: null | string;
+            address: null | string;
+            /** Format: int32 */
+            paymentTermsDays: number;
+            notes: null | string;
         };
         SaveWarehouseCommand: {
             code: string;
@@ -2100,6 +2776,24 @@ export interface components {
         };
         /** @enum {unknown} */
         StockStatus: "InStock" | "Low" | "Out";
+        SupplierDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            contactName: null | string;
+            email: null | string;
+            phone: null | string;
+            address: null | string;
+            /** Format: int32 */
+            paymentTermsDays: number;
+            notes: null | string;
+            isActive: boolean;
+            /** Format: int32 */
+            openOrders: number;
+            /** Format: double */
+            totalPurchased: null | number;
+        };
         TokenRequest: {
             token: string;
         };

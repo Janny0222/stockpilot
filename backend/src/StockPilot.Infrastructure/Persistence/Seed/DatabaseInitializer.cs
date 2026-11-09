@@ -126,5 +126,7 @@ public static class DatabaseInitializer
             .Select(u => (Guid?)u.Id)
             .FirstOrDefaultAsync(ct);
         await DemoInventory.SeedAsync(db, tenantId, ownerId, logger, ct);
+        await DemoPurchasing.SeedAsync(db, tenantId, ownerId, logger, ct);
+        await DemoPurchasing.SyncSequencesAsync(db, tenantId, ct);
     }
 }

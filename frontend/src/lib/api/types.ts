@@ -38,6 +38,16 @@ export type RecordStockCommand = Schemas['RecordStockCommand']
 export type AdjustStockCommand = Schemas['AdjustStockCommand']
 export type TransferStockCommand = Schemas['TransferStockCommand']
 export type SaveWarehouseCommand = Schemas['SaveWarehouseCommand']
+
+export type SupplierDto = Schemas['SupplierDto']
+export type SaveSupplierCommand = Schemas['SaveSupplierCommand']
+export type PurchaseOrderStatus = Schemas['PurchaseOrderStatus']
+export type PurchaseOrderListItemDto = Schemas['PurchaseOrderListItemDto']
+export type PurchaseOrderDetailDto = Schemas['PurchaseOrderDetailDto']
+export type PurchaseOrderItemDto = Schemas['PurchaseOrderItemDto']
+export type SavePurchaseOrderCommand = Schemas['SavePurchaseOrderCommand']
+export type ReceivePurchaseOrderCommand = Schemas['ReceivePurchaseOrderCommand']
+export type ReceiptResult = Schemas['ReceiptResult']
 export type PagedResult<T> = {
   items: T[]
   page: number

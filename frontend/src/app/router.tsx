@@ -8,6 +8,10 @@ import { InventoryPage } from '@/features/inventory/pages/inventory-page'
 import { StockEntryPage } from '@/features/inventory/pages/stock-entry-page'
 import { NewTransferPage, TransferDetailPage } from '@/features/inventory/pages/transfer-pages'
 import { CategoriesPage } from '@/features/products/pages/categories-page'
+import { PurchaseOrderDetailPage } from '@/features/purchasing/pages/purchase-order-detail-page'
+import { PurchaseOrderFormPage } from '@/features/purchasing/pages/purchase-order-form-page'
+import { PurchaseOrdersPage } from '@/features/purchasing/pages/purchase-orders-page'
+import { SupplierDetailPage, SuppliersPage } from '@/features/purchasing/pages/suppliers-pages'
 import { NewProductPage } from '@/features/products/pages/new-product-page'
 import { ProductDetailPage } from '@/features/products/pages/product-detail-page'
 import { ProductsPage } from '@/features/products/pages/products-page'
@@ -93,10 +97,26 @@ export const router = createBrowserRouter([
               { path: 'transfers/:id', handle: crumb('Transfer'), element: <RequirePermission permission={P.Inventory.View}><TransferDetailPage /></RequirePermission> },
             ],
           },
+          {
+            path: 'purchases',
+            handle: crumb('Purchases'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Purchases.View}><PurchaseOrdersPage /></RequirePermission> },
+              { path: 'new', handle: crumb('New order'), element: <RequirePermission permission={P.Purchases.Manage}><PurchaseOrderFormPage /></RequirePermission> },
+              { path: ':id', handle: crumb('Order'), element: <RequirePermission permission={P.Purchases.View}><PurchaseOrderDetailPage /></RequirePermission> },
+              { path: ':id/edit', handle: crumb('Edit'), element: <RequirePermission permission={P.Purchases.Manage}><PurchaseOrderFormPage /></RequirePermission> },
+            ],
+          },
+          {
+            path: 'suppliers',
+            handle: crumb('Suppliers'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Suppliers.View}><SuppliersPage /></RequirePermission> },
+              { path: ':id', handle: crumb('Supplier'), element: <RequirePermission permission={P.Suppliers.View}><SupplierDetailPage /></RequirePermission> },
+            ],
+          },
           { path: 'settings/account', handle: crumb('Account & sessions'), element: <AccountPage /> },
-          soon('purchases', 'Purchases', P.Purchases.View, 'Purchase orders from draft to approval to receiving, with partial deliveries.'),
           soon('sales', 'Sales', P.Sales.View, 'Sales orders with stock reservation and fulfilment.'),
-          soon('suppliers', 'Suppliers', P.Suppliers.View, 'Supplier contacts and purchase history.'),
           soon('reports', 'Reports', P.Reports.View, 'Inventory valuation, sales, purchases and stock movement reports with CSV export.'),
           soon('platform', 'Companies', P.Platform.TenantsView, 'Registered companies, with suspend and activate controls.'),
           { path: '*', element: <NotFoundPage /> },
