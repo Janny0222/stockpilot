@@ -9,6 +9,11 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(import.meta.dirname, './src') },
   },
+  build: {
+    // Vite inlines small files as data: URIs. Fonts must stay real files: our Content-Security-Policy
+    // allows fonts only from our own origin ("font-src 'self'"), and that's stricter than allowing data:.
+    assetsInlineLimit: (filePath) => (/\.(woff2?|ttf|otf)$/.test(filePath) ? false : undefined),
+  },
   server: {
     port: 5173,
     strictPort: true,
