@@ -1,0 +1,55 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", ".editorconfig", ".github/workflows/backend-ci.yml"]
+  pull_request:
+    paths: ["backend/**", ".editorconfig", ".github/workflows/backend-ci.yml"]
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Restore
+        run: dotnet restore StockPilot.slnx
+
+      - name: Build (warnings are errors)
+        run: dotnet build StockPilot.slnx --no-restore -c Release
+
+      - name: Migrations are in sync with the model
+        run: |
+          dotnet tool restore
+          dotnet ef migrations has-pending-model-changes \
+            -p src/StockPilot.Infrastructure -s src/StockPilot.Infrastructure --no-build --configuration Release
+
+      - name: Unit tests
+        run: dotnet test --project tests/StockPilot.UnitTests --no-build -c Release
+
+      # GitHub-hosted runners have Docker, so Testcontainers starts a real PostgreSQL.
+      - name: Integration tests
+        run: dotnet test --project tests/StockPilot.IntegrationTests --no-build -c Release
+
+  docker-image:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image
+        working-directory: .
+        run: docker build -f backend/Dockerfile -t stockpilot-api:ci .

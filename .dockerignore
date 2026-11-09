@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/TestResults/
+.git/
+.vs/
+.vscode/
+.idea/
+.remember/
+**/*.user
+.env
+.env.*
+frontend/dist/
+docs/

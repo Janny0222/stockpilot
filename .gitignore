@@ -1,0 +1,41 @@
+# --- .NET ---
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+*.trx
+coverage*/
+publish/
+efbundle*
+
+# --- Node / frontend ---
+node_modules/
+dist/
+.vite/
+coverage/
+playwright-report/
+test-results/
+*.local
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# --- Runtime data ---
+uploads/
+logs/
+*.log
+
+# --- Editors / OS ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# --- Tool state ---
+.remember/

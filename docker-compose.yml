@@ -1,0 +1,52 @@
+# Local development stack.
+#   docker compose up -d postgres mailpit   → just the dependencies (run the API from your IDE)
+#   docker compose up --build               → everything, API on http://localhost:8080/swagger
+#
+# Postgres is published on 5433 (not 5432) so it never collides with a locally installed PostgreSQL.
+# Redis and the frontend are added in later phases.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: stockpilot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d stockpilot"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Fake SMTP server: every email the app sends shows up at http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Database: "Host=postgres;Port=5432;Database=stockpilot;Username=postgres;Password=postgres"
+      Email__Provider: Smtp
+      Email__SmtpHost: mailpit
+      Email__SmtpPort: "1025"
+      Cors__AllowedOrigins__0: "http://localhost:5173"
+    ports:
+      - "8080:8080"
+
+volumes:
+  pgdata:
