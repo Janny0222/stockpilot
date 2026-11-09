@@ -2,6 +2,7 @@ import type { LucideIcon } from 'lucide-react'
 import { LoaderCircle, TriangleExclamationPoint } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
+import { useDelayedFlag } from '@/hooks/use-delayed-flag'
 import { toApiError } from '@/lib/api/errors'
 import { cn } from '@/lib/utils'
 import { LogoMark } from './logo'
@@ -65,13 +66,29 @@ export function ErrorState({ error, onRetry, className }: { error: unknown; onRe
 }
 
 export function FullPageLoader({ label = 'Loading StockPilot' }: { label?: string }) {
+  const slow = useDelayedFlag(true, 4000)
   return (
-    <div className="grid min-h-svh place-items-center bg-background" role="status" aria-live="polite">
-      <div className="flex flex-col items-center gap-4">
+    <div className="grid min-h-svh place-items-center bg-background px-6" role="status" aria-live="polite">
+      <div className="flex flex-col items-center gap-4 text-center">
         <LogoMark className="size-10" />
         <LoaderCircle className="size-5 animate-spin text-muted-foreground" aria-hidden="true" />
-        <span className="sr-only">{label}</span>
+        {slow ? <ServerWakingMessage /> : <span className="sr-only">{label}</span>}
       </div>
+    </div>
+  )
+}
+
+/**
+ * The free hosting tier puts the API to sleep after 15 idle minutes; the first request then takes
+ * up to a minute. Telling people that is better than an endless spinner.
+ */
+export function ServerWakingMessage({ className }: { className?: string }) {
+  return (
+    <div className={cn('max-w-xs', className)}>
+      <p className="font-semibold">Waking up the server…</p>
+      <p className="mt-1 text-sm text-muted-foreground">
+        This demo runs on free hosting that sleeps when idle. The first load can take up to a minute.
+      </p>
     </div>
   )
 }

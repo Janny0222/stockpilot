@@ -6,7 +6,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { safeReturnTo } from '@/app/guards'
 import { FormField } from '@/components/shared/form-field'
+import { ServerWakingMessage } from '@/components/shared/states'
 import { Button } from '@/components/ui/button'
+import { useDelayedFlag } from '@/hooks/use-delayed-flag'
 import { toApiError, type ApiError } from '@/lib/api/errors'
 import { authApi } from '../api'
 import { AuthLayout } from '../components/auth-layout'
@@ -29,6 +31,8 @@ export function LoginPage() {
     },
     onSuccess: () => navigate(safeReturnTo(params.get('returnTo')), { replace: true }),
   })
+
+  const slowLogin = useDelayedFlag(login.isPending, 4000)
 
   const resend = useMutation({
     mutationFn: () => authApi.resendVerification(form.getValues('email')),
@@ -97,6 +101,7 @@ export function LoginPage() {
           {login.isPending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
           Sign in
         </Button>
+        {slowLogin && <ServerWakingMessage className="max-w-none text-center" />}
       </form>
 
       {import.meta.env.DEV && <DemoAccounts onPick={(email) => form.reset({ email, password: 'Demo@12345' })} />}

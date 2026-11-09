@@ -33,6 +33,9 @@ try
         app.UseForwardedHeaders(); // must run first so later middleware sees the real client IP/scheme
     }
 
+    // After UseForwardedHeaders: the authenticated proxy's X-Client-IP wins over the Cloudflare hop.
+    app.UseMiddleware<StockPilot.API.Middleware.TrustedProxyClientIpMiddleware>();
+
     app.UseExceptionHandler();      // turns exceptions from anything below into ProblemDetails
     app.UseStatusCodePages();       // bare 401/403/404s get a ProblemDetails body too
     app.UseSerilogRequestLogging(); // one structured log line per request (method, path, status, ms)

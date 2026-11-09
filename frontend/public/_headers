@@ -1,0 +1,14 @@
+# Cloudflare Pages response headers (static assets and the SPA shell).
+# CSP: everything from our own origin only. 'unsafe-inline' for styles is required by Radix/Sonner
+# positioning (inline style attributes); scripts stay strict.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Vite fingerprints asset filenames (index-3f9a1c.js), so they can be cached forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
