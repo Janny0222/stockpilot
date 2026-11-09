@@ -10,6 +10,7 @@ using StockPilot.Domain.Common;
 using StockPilot.Domain.Identity;
 using StockPilot.Domain.Inventory;
 using StockPilot.Domain.Purchasing;
+using StockPilot.Domain.Sales;
 using StockPilot.Domain.Tenancy;
 using StockPilot.Domain.Warehousing;
 
@@ -48,6 +49,11 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
     public DbSet<PurchaseOrderItem> PurchaseOrderItems => Set<PurchaseOrderItem>();
     public DbSet<PurchaseReceipt> PurchaseReceipts => Set<PurchaseReceipt>();
     public DbSet<PurchaseReceiptItem> PurchaseReceiptItems => Set<PurchaseReceiptItem>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<SalesOrder> SalesOrders => Set<SalesOrder>();
+    public DbSet<SalesOrderItem> SalesOrderItems => Set<SalesOrderItem>();
+    public DbSet<SalesShipment> SalesShipments => Set<SalesShipment>();
+    public DbSet<SalesShipmentItem> SalesShipmentItems => Set<SalesShipmentItem>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     public Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> work, CancellationToken cancellationToken)
@@ -74,6 +80,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
         ["ix_product_variants_tenant_id_barcode"] = ("BARCODE_TAKEN", "Another product already uses this barcode."),
         ["ix_product_categories_tenant_id_parent_id_name"] = ("CATEGORY_NAME_TAKEN", "A category with this name already exists here."),
         ["ix_suppliers_tenant_id_code"] = ("SUPPLIER_CODE_TAKEN", "Another supplier already uses this code."),
+        ["ix_customers_tenant_id_code"] = ("CUSTOMER_CODE_TAKEN", "Another customer already uses this code."),
     };
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

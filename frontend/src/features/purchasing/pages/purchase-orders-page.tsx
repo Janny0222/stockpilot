@@ -7,15 +7,12 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import type { PurchaseOrderListItemDto, PurchaseOrderStatus } from '@/lib/api/types'
-import { formatMoney, useCurrency } from '@/lib/format'
+import { formatDate, formatMoney, useCurrency } from '@/lib/format'
 import { Permissions as P } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
 import { useHasPermission } from '@/stores/auth-store'
 import { PO_STATUS, usePurchaseOrders } from '../api'
 import { PoStatusBadge, ReceiptProgress } from '../components/purchasing-parts'
-
-const date = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium' })
-export const formatDate = (iso: string | null | undefined) => (iso ? date.format(new Date(`${iso}T00:00:00`)) : '—')
 
 const STATUS_FILTERS: (PurchaseOrderStatus | 'All')[] = ['All', 'Draft', 'Submitted', 'Approved', 'PartiallyReceived', 'Received', 'Cancelled']
 

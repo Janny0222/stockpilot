@@ -27,3 +27,8 @@ export const formatQuantity = (value: number) => qty.format(value)
 export function useCurrency() {
   return useAuthStore((s) => s.user?.tenant?.currency ?? 'PHP')
 }
+
+const dateFormatter = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium' })
+
+/** A calendar date from the API (yyyy-mm-dd), shown as e.g. Nov 9, 2026. Parsed as LOCAL midnight so it never shifts a day. */
+export const formatDate = (iso: string | null | undefined) => (iso ? dateFormatter.format(new Date(`${iso}T00:00:00`)) : '—')

@@ -128,5 +128,7 @@ public static class DatabaseInitializer
         await DemoInventory.SeedAsync(db, tenantId, ownerId, logger, ct);
         await DemoPurchasing.SeedAsync(db, tenantId, ownerId, logger, ct);
         await DemoPurchasing.SyncSequencesAsync(db, tenantId, ct);
+        await DemoSales.SeedAsync(db, tenantId, ownerId, logger, ct);
+        await DemoSales.SyncSequencesAsync(db, tenantId, ct);
     }
 }

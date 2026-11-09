@@ -12,6 +12,10 @@ import { PurchaseOrderDetailPage } from '@/features/purchasing/pages/purchase-or
 import { PurchaseOrderFormPage } from '@/features/purchasing/pages/purchase-order-form-page'
 import { PurchaseOrdersPage } from '@/features/purchasing/pages/purchase-orders-page'
 import { SupplierDetailPage, SuppliersPage } from '@/features/purchasing/pages/suppliers-pages'
+import { CustomerDetailPage, CustomersPage } from '@/features/sales/pages/customers-pages'
+import { SalesOrderDetailPage } from '@/features/sales/pages/sales-order-detail-page'
+import { SalesOrderFormPage } from '@/features/sales/pages/sales-order-form-page'
+import { SalesOrdersPage } from '@/features/sales/pages/sales-orders-page'
 import { NewProductPage } from '@/features/products/pages/new-product-page'
 import { ProductDetailPage } from '@/features/products/pages/product-detail-page'
 import { ProductsPage } from '@/features/products/pages/products-page'
@@ -115,8 +119,25 @@ export const router = createBrowserRouter([
               { path: ':id', handle: crumb('Supplier'), element: <RequirePermission permission={P.Suppliers.View}><SupplierDetailPage /></RequirePermission> },
             ],
           },
+          {
+            path: 'sales',
+            handle: crumb('Sales'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Sales.View}><SalesOrdersPage /></RequirePermission> },
+              { path: 'new', handle: crumb('New order'), element: <RequirePermission permission={P.Sales.Create}><SalesOrderFormPage /></RequirePermission> },
+              { path: ':id', handle: crumb('Order'), element: <RequirePermission permission={P.Sales.View}><SalesOrderDetailPage /></RequirePermission> },
+              { path: ':id/edit', handle: crumb('Edit'), element: <RequirePermission permission={P.Sales.Create}><SalesOrderFormPage /></RequirePermission> },
+            ],
+          },
+          {
+            path: 'customers',
+            handle: crumb('Customers'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Customers.View}><CustomersPage /></RequirePermission> },
+              { path: ':id', handle: crumb('Customer'), element: <RequirePermission permission={P.Customers.View}><CustomerDetailPage /></RequirePermission> },
+            ],
+          },
           { path: 'settings/account', handle: crumb('Account & sessions'), element: <AccountPage /> },
-          soon('sales', 'Sales', P.Sales.View, 'Sales orders with stock reservation and fulfilment.'),
           soon('reports', 'Reports', P.Reports.View, 'Inventory valuation, sales, purchases and stock movement reports with CSV export.'),
           soon('platform', 'Companies', P.Platform.TenantsView, 'Registered companies, with suspend and activate controls.'),
           { path: '*', element: <NotFoundPage /> },

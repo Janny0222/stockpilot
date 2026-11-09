@@ -2004,6 +2004,472 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    IsActive?: boolean;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfCustomerDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveCustomerCommand"];
+                    "text/json": components["schemas"]["SaveCustomerCommand"];
+                    "application/*+json": components["schemas"]["SaveCustomerCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedIdResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CustomerDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveCustomerCommand"];
+                    "text/json": components["schemas"]["SaveCustomerCommand"];
+                    "application/*+json": components["schemas"]["SaveCustomerCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Status?: components["schemas"]["SalesOrderStatus"];
+                    CustomerId?: string;
+                    WarehouseId?: string;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfSalesOrderListItemDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveSalesOrderCommand"];
+                    "text/json": components["schemas"]["SaveSalesOrderCommand"];
+                    "application/*+json": components["schemas"]["SaveSalesOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CreatedIdResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales-orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SalesOrderDetailDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SaveSalesOrderCommand"];
+                    "text/json": components["schemas"]["SaveSalesOrderCommand"];
+                    "application/*+json": components["schemas"]["SaveSalesOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales-orders/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm the order and reserve its stock. Fails with INSUFFICIENT_STOCK (nothing reserved) if any line is short. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales-orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel the order (or what's left of it) and release its reserved stock. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CancelSalesOrderCommand"];
+                    "text/json": components["schemas"]["CancelSalesOrderCommand"];
+                    "application/*+json": components["schemas"]["CancelSalesOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales-orders/{id}/shipments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ship (fulfil) all or part of the order. Idempotent: a double-submitted shipment is applied once. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ShipSalesOrderCommand"];
+                    "text/json": components["schemas"]["ShipSalesOrderCommand"];
+                    "application/*+json": components["schemas"]["ShipSalesOrderCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ShipmentResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/warehouses": {
         parameters: {
             query?: never;
@@ -2280,6 +2746,9 @@ export interface components {
         CancelPurchaseOrderCommand: {
             reason: string;
         };
+        CancelSalesOrderCommand: {
+            reason: string;
+        };
         CategoryDto: {
             /** Format: uuid */
             id: string;
@@ -2301,6 +2770,24 @@ export interface components {
         CreatedIdResponse: {
             /** Format: uuid */
             id: string;
+        };
+        CustomerDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            contactName: null | string;
+            email: null | string;
+            phone: null | string;
+            address: null | string;
+            /** Format: int32 */
+            paymentTermsDays: number;
+            notes: null | string;
+            isActive: boolean;
+            /** Format: int32 */
+            openOrders: number;
+            /** Format: double */
+            totalSales: number;
         };
         EmailRequest: {
             email: string;
@@ -2382,6 +2869,18 @@ export interface components {
             quantityAfter: number;
         };
         /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfCustomerDto: {
+            items: components["schemas"]["CustomerDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfMovementDto: {
             items: components["schemas"]["MovementDto"][];
             /** Format: int32 */
@@ -2408,6 +2907,18 @@ export interface components {
         /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfPurchaseOrderListItemDto: {
             items: components["schemas"]["PurchaseOrderListItemDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfSalesOrderListItemDto: {
+            items: components["schemas"]["SalesOrderListItemDto"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -2682,11 +3193,120 @@ export interface components {
             token: string;
             newPassword: string;
         };
+        SalesLineInput: {
+            /** Format: uuid */
+            variantId: string;
+            /** Format: double */
+            quantity: number;
+            /** Format: double */
+            unitPrice: number;
+        };
+        SalesOrderDetailDto: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            status: components["schemas"]["SalesOrderStatus"];
+            /** Format: uuid */
+            customerId: string;
+            customerName: string;
+            /** Format: uuid */
+            warehouseId: string;
+            warehouseName: string;
+            /** Format: date */
+            orderDate: string;
+            notes: null | string;
+            /** Format: double */
+            total: number;
+            /** Format: uint32 */
+            version: number;
+            createdBy: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            confirmedAt: null | string;
+            confirmedBy: null | string;
+            /** Format: date-time */
+            cancelledAt: null | string;
+            cancelReason: null | string;
+            profit: null | components["schemas"]["SalesProfitDto"];
+            items: components["schemas"]["SalesOrderItemDto"][];
+            shipments: components["schemas"]["ShipmentDto"][];
+        };
+        SalesOrderItemDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            variantId: string;
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            sku: string;
+            variantName: null | string;
+            unitOfMeasure: string;
+            /** Format: double */
+            quantityOrdered: number;
+            /** Format: double */
+            quantityShipped: number;
+            /** Format: double */
+            quantityRemaining: number;
+            /** Format: double */
+            unitPrice: number;
+            /** Format: double */
+            lineTotal: number;
+            /** Format: double */
+            available: number;
+        };
+        SalesOrderListItemDto: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: uuid */
+            customerId: string;
+            customerName: string;
+            /** Format: uuid */
+            warehouseId: string;
+            warehouseCode: string;
+            status: components["schemas"]["SalesOrderStatus"];
+            /** Format: date */
+            orderDate: string;
+            /** Format: int32 */
+            itemCount: number;
+            /** Format: double */
+            quantityOrdered: number;
+            /** Format: double */
+            quantityShipped: number;
+            /** Format: double */
+            total: number;
+        };
+        /** @enum {unknown} */
+        SalesOrderStatus: "Draft" | "Confirmed" | "PartiallyFulfilled" | "Fulfilled" | "Cancelled";
+        /** @description Revenue, cost and margin of what has SHIPPED so far. Null unless the user may see costs. */
+        SalesProfitDto: {
+            /** Format: double */
+            revenue: number;
+            /** Format: double */
+            costOfGoods: number;
+            /** Format: double */
+            grossProfit: number;
+            /** Format: double */
+            marginPercent: null | number;
+        };
         SaveCategoryCommand: {
             name: string;
             description: null | string;
             /** Format: uuid */
             parentId: null | string;
+        };
+        SaveCustomerCommand: {
+            code: string;
+            name: string;
+            contactName: null | string;
+            email: null | string;
+            phone: null | string;
+            address: null | string;
+            /** Format: int32 */
+            paymentTermsDays: number;
+            notes: null | string;
         };
         SavePurchaseOrderCommand: {
             /** Format: uuid */
@@ -2699,6 +3319,18 @@ export interface components {
             expectedDate: null | string;
             notes: null | string;
             lines: components["schemas"]["PurchaseLineInput"][];
+            /** Format: uint32 */
+            version: null | number;
+        };
+        SaveSalesOrderCommand: {
+            /** Format: uuid */
+            customerId: string;
+            /** Format: uuid */
+            warehouseId: string;
+            /** Format: date */
+            orderDate: string;
+            notes: null | string;
+            lines: components["schemas"]["SalesLineInput"][];
             /** Format: uint32 */
             version: null | number;
         };
@@ -2731,6 +3363,38 @@ export interface components {
             ipAddress: null | string;
             userAgent: null | string;
             isCurrent: boolean;
+        };
+        ShipLineInput: {
+            /** Format: uuid */
+            itemId: string;
+            /** Format: double */
+            quantity: number;
+        };
+        ShipSalesOrderCommand: {
+            lines: components["schemas"]["ShipLineInput"][];
+            note: null | string;
+        };
+        ShipmentDto: {
+            /** Format: uuid */
+            id: string;
+            number: string;
+            /** Format: date-time */
+            shippedAt: string;
+            shippedBy: null | string;
+            note: null | string;
+            items: components["schemas"]["ShipmentItemDto"][];
+        };
+        ShipmentItemDto: {
+            sku: string;
+            productName: string;
+            /** Format: double */
+            quantity: number;
+        };
+        ShipmentResult: {
+            /** Format: uuid */
+            shipmentId: string;
+            shipmentNumber: string;
+            status: components["schemas"]["SalesOrderStatus"];
         };
         StockLevelDto: {
             /** Format: uuid */
@@ -2937,6 +3601,8 @@ export interface components {
             onHand: number;
             /** Format: double */
             available: number;
+            /** Format: double */
+            sellingPrice: number;
         };
         WarehouseDto: {
             /** Format: uuid */

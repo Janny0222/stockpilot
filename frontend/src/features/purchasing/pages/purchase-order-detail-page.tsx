@@ -15,12 +15,11 @@ import { FormAlert } from '@/features/auth/components/form-alert'
 import { useIdempotencyKey } from '@/hooks/use-idempotency-key'
 import { toApiError } from '@/lib/api/errors'
 import type { PurchaseOrderDetailDto } from '@/lib/api/types'
-import { formatMoney, formatQuantity, useCurrency } from '@/lib/format'
+import { formatDate, formatMoney, formatQuantity, useCurrency } from '@/lib/format'
 import { Permissions as P } from '@/lib/permissions'
 import { useHasPermission } from '@/stores/auth-store'
 import { usePurchaseOrder, usePurchaseOrderAction, useReceivePurchaseOrder } from '../api'
 import { PoStatusBadge } from '../components/purchasing-parts'
-import { formatDate } from './purchase-orders-page'
 
 const dateTime = new Intl.DateTimeFormat('en-PH', {
   dateStyle: 'medium',

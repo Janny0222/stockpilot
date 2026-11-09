@@ -66,6 +66,41 @@ public sealed class WarehouseStock : TenantEntity
         QuantityOnHand -= quantity;
     }
 
+    /// <summary>
+    /// Promises stock to a confirmed sales order. On-hand doesn't change; AVAILABLE drops, so nobody else can sell,
+    /// transfer or issue those units. Can't reserve more than is available (unless the company allows negatives).
+    /// </summary>
+    public void Reserve(decimal quantity, bool allowNegative, string? sku = null)
+    {
+        EnsurePositive(quantity);
+        if (!allowNegative && quantity > QuantityAvailable)
+        {
+            throw new InsufficientStockException(QuantityAvailable, quantity, sku);
+        }
+
+        QuantityReserved += quantity;
+    }
+
+    /// <summary>Gives reserved units back to available (order cancelled). Never below zero.</summary>
+    public void Release(decimal quantity)
+    {
+        EnsurePositive(quantity);
+        QuantityReserved = Math.Max(0, QuantityReserved - quantity);
+    }
+
+    /// <summary>Ships reserved units: they leave on-hand AND the reservation in one step.</summary>
+    public void ShipReserved(decimal quantity)
+    {
+        EnsurePositive(quantity);
+        if (quantity > QuantityReserved)
+        {
+            throw new DomainException("NOT_RESERVED", $"Only {QuantityReserved:0.###} reserved, but {quantity:0.###} to ship.");
+        }
+
+        QuantityReserved -= quantity;
+        QuantityOnHand -= quantity;
+    }
+
     /// <summary>Sets on-hand to a counted quantity (stocktake). Returns the signed difference that was applied.</summary>
     public decimal AdjustTo(decimal countedQuantity)
     {
@@ -107,8 +142,8 @@ public sealed class WarehouseStock : TenantEntity
 }
 
 /// <summary>422 with the numbers the UI needs to explain it ("only 3 available").</summary>
-public sealed class InsufficientStockException(decimal available, decimal requested)
-    : DomainException("INSUFFICIENT_STOCK", $"Only {available:0.###} available, but {requested:0.###} requested.")
+public sealed class InsufficientStockException(decimal available, decimal requested, string? sku = null)
+    : DomainException("INSUFFICIENT_STOCK", $"{(sku is null ? "" : sku + ": ")}Only {available:0.###} available, but {requested:0.###} requested.")
 {
     public decimal Available { get; } = available;
     public decimal Requested { get; } = requested;

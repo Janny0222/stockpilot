@@ -262,7 +262,7 @@ public sealed class GetTransferHandler(IAppDbContext db, WarehouseAccessService 
 
 public sealed record VariantOptionDto(
     Guid VariantId, Guid ProductId, string ProductName, string Sku, string? VariantName, string UnitOfMeasure,
-    decimal? CostPrice, decimal OnHand, decimal Available);
+    decimal? CostPrice, decimal OnHand, decimal Available, decimal SellingPrice);
 
 /// <summary>Type-ahead for stock forms: active variants matching name/SKU/barcode, with stock in the chosen warehouse.</summary>
 public sealed class SearchStockVariantsHandler(IAppDbContext db, PermissionChecker permissions)
@@ -291,7 +291,8 @@ public sealed class SearchStockVariantsHandler(IAppDbContext db, PermissionCheck
                 r.v.Id, r.p.Id, r.p.Name, r.v.Sku, r.v.Name, r.p.UnitOfMeasure,
                 canViewCost ? r.v.CostPrice : null,
                 db.WarehouseStocks.Where(s => s.ProductVariantId == r.v.Id && s.WarehouseId == warehouseId).Select(s => s.QuantityOnHand).FirstOrDefault(),
-                db.WarehouseStocks.Where(s => s.ProductVariantId == r.v.Id && s.WarehouseId == warehouseId).Select(s => s.QuantityOnHand - s.QuantityReserved).FirstOrDefault()))
+                db.WarehouseStocks.Where(s => s.ProductVariantId == r.v.Id && s.WarehouseId == warehouseId).Select(s => s.QuantityOnHand - s.QuantityReserved).FirstOrDefault(),
+                r.v.SellingPrice))
             .ToListAsync(ct);
     }
 }

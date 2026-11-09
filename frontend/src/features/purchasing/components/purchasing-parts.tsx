@@ -27,18 +27,18 @@ export function PoStatusBadge({ status }: { status: PurchaseOrderStatus }) {
   )
 }
 
-/** Received ÷ ordered as a thin bar: partial deliveries are visible at a glance in the list. */
-export function ReceiptProgress({ received, ordered }: { received: number; ordered: number }) {
+/** Done ÷ ordered as a thin bar: partial deliveries (received or shipped) are visible at a glance in a list. */
+export function ReceiptProgress({ received, ordered, label = 'Received' }: { received: number; ordered: number; label?: string }) {
   const pct = ordered > 0 ? Math.min(100, Math.round((received / ordered) * 100)) : 0
   return (
-    <div className="flex items-center gap-2" title={`${pct}% received`}>
+    <div className="flex items-center gap-2" title={`${pct}% ${label.toLowerCase()}`}>
       <div
         className="h-1.5 w-16 overflow-hidden rounded-full bg-muted"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label="Received"
+        aria-label={label}
       >
         <div className={cn('h-full rounded-full', pct === 100 ? 'bg-success' : 'bg-primary')} style={{ width: `${pct}%` }} />
       </div>

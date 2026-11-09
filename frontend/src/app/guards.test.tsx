@@ -65,7 +65,7 @@ describe('role-based navigation', () => {
 
   it('Sales Staff see selling-related modules only', () => {
     const sales = ['dashboard.view', 'products.view', 'inventory.view', 'warehouses.view', 'customers.view', 'customers.manage', 'sales.view', 'sales.create', 'sales.fulfil']
-    expect(labels(sales)).toEqual(['Dashboard', 'Products', 'Inventory', 'Sales', 'Warehouses'])
+    expect(labels(sales)).toEqual(['Dashboard', 'Products', 'Inventory', 'Sales', 'Customers', 'Warehouses'])
   })
 
   it('a user with no permissions sees no modules', () => {
