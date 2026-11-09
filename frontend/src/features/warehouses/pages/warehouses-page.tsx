@@ -1,14 +1,18 @@
-import { MapPin, Search, Warehouse } from 'lucide-react'
+import { MapPin, Plus, Search, Warehouse } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { DataTable, Pagination, type Column, type SortState } from '@/components/shared/data-table'
 import { EmptyState, ErrorState, PageHeader } from '@/components/shared/states'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import type { WarehouseDto } from '@/lib/api/types'
-import { useAuthStore } from '@/stores/auth-store'
+import { Permissions as P } from '@/lib/permissions'
+import { useAuthStore, useHasPermission } from '@/stores/auth-store'
 import { useWarehouses } from '../api'
+import { WarehouseDialog } from '../warehouse-dialog'
 
 const PAGE_SIZE = 10
 
@@ -72,6 +76,8 @@ export function WarehousesPage() {
   const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const scope = useAuthStore((s) => s.user?.warehouseScope)
+  const canManage = useHasPermission(P.Warehouses.Manage)
+  const [adding, setAdding] = useState(false)
 
   const page = Math.max(1, Number(params.get('page')) || 1)
   const search = params.get('q') ?? ''
@@ -108,7 +114,15 @@ export function WarehousesPage() {
             ? 'Showing only the warehouses assigned to you.'
             : 'Every location where your company keeps stock.'
         }
+        actions={
+          canManage && (
+            <Button onClick={() => setAdding(true)}>
+              <Plus /> Add warehouse
+            </Button>
+          )
+        }
       />
+      {canManage && <WarehouseDialog open={adding} onOpenChange={setAdding} />}
 
       <Card className="gap-0 overflow-hidden py-0 shadow-card">
         <div className="border-b p-4">

@@ -70,6 +70,26 @@ public interface IFileStorage
 
 public sealed record StoredFileContent(byte[] Data, string ContentType);
 
+/// <summary>
+/// Pessimistic locking for stock balances. Ensures a WarehouseStock row exists for every (warehouse, variant)
+/// pair, then locks them all with SELECT … FOR UPDATE in ascending ID order and returns them tracked.
+/// Must be called inside IAppDbContext.ExecuteInTransactionAsync; the locks are held until commit.
+///
+/// Why ordered? Request A locks rows 1 then 2 while request B locks 2 then 1 → deadlock. If everyone locks
+/// in the same (ID) order, the second request simply waits for the first.
+/// </summary>
+public interface IStockLocker
+{
+    Task<IReadOnlyDictionary<(Guid WarehouseId, Guid VariantId), Domain.Inventory.WarehouseStock>> LockAsync(
+        Guid tenantId, IReadOnlyCollection<(Guid WarehouseId, Guid VariantId)> keys, CancellationToken cancellationToken);
+}
+
+/// <summary>Per-company sequential document numbers: TR-000001, TR-000002… Gap-free within a committed transaction.</summary>
+public interface IDocumentNumberGenerator
+{
+    Task<string> NextAsync(Guid tenantId, string prefix, CancellationToken cancellationToken);
+}
+
 public sealed record ProcessedImage(byte[] Data, string ContentType, int Width, int Height);
 
 /// <summary>Validates an uploaded image by content (not file name) and re-encodes it safely.</summary>

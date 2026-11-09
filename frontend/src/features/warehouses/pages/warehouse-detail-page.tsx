@@ -1,21 +1,30 @@
-import { ArrowLeft, Boxes } from 'lucide-react'
+import { Archive, ArchiveRestore, ArrowLeft, MapPin, Pencil, Star } from 'lucide-react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { EmptyState, ErrorState, PageHeader } from '@/components/shared/states'
+import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/shared/confirm-dialog'
+import { ErrorState, PageHeader } from '@/components/shared/states'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useWarehouse } from '../api'
+import { StockTable } from '@/features/inventory/components/stock-table'
+import { toApiError } from '@/lib/api/errors'
+import { Permissions as P } from '@/lib/permissions'
+import { useHasPermission } from '@/stores/auth-store'
+import { useWarehouse, useWarehouseAction } from '../api'
+import { WarehouseDialog } from '../warehouse-dialog'
 
 export function WarehouseDetailPage() {
   const { id = '' } = useParams()
   const query = useWarehouse(id)
+  const canManage = useHasPermission(P.Warehouses.Manage)
+  const action = useWarehouseAction(id)
+  const [editing, setEditing] = useState(false)
 
   const back = (
     <Button asChild variant="outline">
-      <Link to="/warehouses">
-        <ArrowLeft /> All warehouses
-      </Link>
+      <Link to="/warehouses"><ArrowLeft /> All warehouses</Link>
     </Button>
   )
 
@@ -23,7 +32,7 @@ export function WarehouseDetailPage() {
     return (
       <div className="grid gap-6">
         <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-40 w-full max-w-2xl" />
+        <Skeleton className="h-80 w-full" />
       </div>
     )
   }
@@ -33,67 +42,62 @@ export function WarehouseDetailPage() {
     return (
       <>
         <PageHeader title="Warehouse" actions={back} />
-        <Card className="shadow-card">
-          <ErrorState error={query.error} />
-        </Card>
+        <Card className="shadow-card"><ErrorState error={query.error} /></Card>
       </>
     )
   }
 
   const w = query.data
   const address = [w.addressLine, w.city, w.country].filter(Boolean).join(', ')
+  const run = (a: 'archive' | 'restore' | 'default', success: string) =>
+    action.mutate(a, { onSuccess: () => toast.success(success), onError: (e) => toast.error(toApiError(e).message) })
 
   return (
     <>
-      <PageHeader title={w.name} description={`Warehouse code ${w.code}`} actions={back} />
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid gap-4 text-sm">
-              <Detail label="Code" value={<span className="tabular">{w.code}</span>} />
-              <Detail label="Address" value={address || <span className="text-muted-foreground">Not set</span>} />
-              <Detail
-                label="Status"
-                value={
-                  <div className="flex gap-1.5">
-                    {w.isDefault && <Badge variant="secondary">Default</Badge>}
-                    <Badge variant="outline" className={w.isActive ? 'border-success/30 text-success' : ''}>
-                      {w.isActive ? 'Active' : 'Archived'}
-                    </Badge>
-                  </div>
-                }
+      <PageHeader
+        title={w.name}
+        description={
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-foreground">{w.code}</span>
+            {address && (
+              <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" aria-hidden="true" />{address}</span>
+            )}
+            {w.isDefault && <Badge variant="secondary">Default</Badge>}
+            {!w.isActive && <Badge variant="outline">Archived</Badge>}
+          </span>
+        }
+        actions={
+          <>
+            {back}
+            {canManage && w.isActive && (
+              <Button variant="outline" onClick={() => setEditing(true)}><Pencil /> Edit</Button>
+            )}
+            {canManage && w.isActive && !w.isDefault && (
+              <Button variant="outline" onClick={() => run('default', `${w.name} is now the default warehouse.`)} disabled={action.isPending}>
+                <Star /> Make default
+              </Button>
+            )}
+            {canManage && w.isActive && !w.isDefault && (
+              <ConfirmDialog
+                trigger={<Button variant="outline" disabled={action.isPending}><Archive /> Archive</Button>}
+                title={`Archive ${w.name}?`}
+                description="Archived warehouses can't receive or ship stock. A warehouse must be empty before it can be archived. Its history is kept."
+                confirmLabel="Archive warehouse"
+                onConfirm={() => run('archive', 'Warehouse archived.')}
               />
-            </dl>
-          </CardContent>
-        </Card>
+            )}
+            {canManage && !w.isActive && (
+              <Button onClick={() => run('restore', 'Warehouse restored.')} disabled={action.isPending}><ArchiveRestore /> Restore</Button>
+            )}
+          </>
+        }
+      />
 
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Stock in this warehouse</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <EmptyState
-              icon={Boxes}
-              className="py-8"
-              title="Stock levels arrive with the Inventory module"
-              description="Once products and stock movements are added, this shows what's on hand here."
-            />
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="gap-0 overflow-hidden py-0 shadow-card">
+        <StockTable fixedWarehouseId={w.id} />
+      </Card>
+
+      {canManage && <WarehouseDialog warehouse={w} open={editing} onOpenChange={setEditing} />}
     </>
-  )
-}
-
-function Detail({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[7rem_1fr] gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium">{value}</dd>
-    </div>
   )
 }

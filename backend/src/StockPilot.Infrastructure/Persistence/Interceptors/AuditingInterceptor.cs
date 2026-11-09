@@ -29,8 +29,13 @@ internal sealed class AuditingInterceptor(ICurrentUser currentUser, TimeProvider
 
     // Entities that are logs/credentials themselves; auditing them is noise (or a leak).
     // StoredFile holds raw image bytes: auditing it would copy megabytes into audit_logs.
+    // The inventory ledger IS an audit trail (who, what, when, before/after), and WarehouseStock is a snapshot
+    // derived from it, so auditing either would only duplicate every stock movement.
     private static readonly HashSet<Type> NotAudited =
-        [typeof(AuditLog), typeof(RefreshToken), typeof(UserToken), typeof(Domain.Catalog.StoredFile)];
+    [
+        typeof(AuditLog), typeof(RefreshToken), typeof(UserToken), typeof(Domain.Catalog.StoredFile),
+        typeof(Domain.Inventory.InventoryTransaction), typeof(Domain.Inventory.WarehouseStock), typeof(IdempotencyRecord),
+    ];
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {

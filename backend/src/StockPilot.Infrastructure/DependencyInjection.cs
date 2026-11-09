@@ -67,6 +67,11 @@ public static class DependencyInjection
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<ISessionValidator, SessionValidator>();
 
+        // ---- Inventory
+        services.AddScoped<IStockLocker, Inventory.StockLocker>();
+        services.AddScoped<IDocumentNumberGenerator, Inventory.DocumentNumberGenerator>();
+        services.AddScoped<Persistence.IdempotencyStore>();
+
         // ---- Files & images
         services.AddScoped<IFileStorage, Storage.DatabaseFileStorage>();
         services.AddSingleton<IImageProcessor, Storage.SkiaImageProcessor>();

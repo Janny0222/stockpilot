@@ -1350,6 +1350,313 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                     b.ToTable("user_warehouse_access", (string)null);
                 });
 
+            modelBuilder.Entity("StockPilot.Domain.Inventory.InventoryTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CorrelationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("note");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("occurred_at");
+
+                    b.Property<Guid?>("PerformedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("performed_by");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_variant_id");
+
+                    b.Property<decimal>("QuantityAfter")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity_after");
+
+                    b.Property<decimal>("QuantityChange")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity_change");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("reference");
+
+                    b.Property<Guid?>("SourceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_id");
+
+                    b.Property<string>("SourceType")
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("source_type");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("type");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("unit_cost");
+
+                    b.Property<Guid>("WarehouseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("warehouse_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_inventory_transactions");
+
+                    b.HasIndex("CorrelationId")
+                        .HasDatabaseName("ix_inventory_transactions_correlation_id");
+
+                    b.HasIndex("ProductVariantId")
+                        .HasDatabaseName("ix_inventory_transactions_product_variant_id");
+
+                    b.HasIndex("WarehouseId")
+                        .HasDatabaseName("ix_inventory_transactions_warehouse_id");
+
+                    b.HasIndex("TenantId", "OccurredAt")
+                        .HasDatabaseName("ix_inventory_transactions_tenant_id_occurred_at");
+
+                    b.HasIndex("TenantId", "ProductVariantId", "OccurredAt")
+                        .HasDatabaseName("ix_inventory_transactions_tenant_id_product_variant_id_occurre");
+
+                    b.HasIndex("TenantId", "WarehouseId", "OccurredAt")
+                        .HasDatabaseName("ix_inventory_transactions_tenant_id_warehouse_id_occurred_at");
+
+                    b.ToTable("inventory_transactions", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.StockTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CompletedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completed_at");
+
+                    b.Property<Guid?>("CompletedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("completed_by");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("DestinationWarehouseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("destination_warehouse_id");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("note");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("number");
+
+                    b.Property<Guid>("SourceWarehouseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("source_warehouse_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stock_transfers");
+
+                    b.HasIndex("DestinationWarehouseId")
+                        .HasDatabaseName("ix_stock_transfers_destination_warehouse_id");
+
+                    b.HasIndex("SourceWarehouseId")
+                        .HasDatabaseName("ix_stock_transfers_source_warehouse_id");
+
+                    b.HasIndex("TenantId", "CompletedAt")
+                        .HasDatabaseName("ix_stock_transfers_tenant_id_completed_at");
+
+                    b.HasIndex("TenantId", "Number")
+                        .IsUnique()
+                        .HasDatabaseName("ix_stock_transfers_tenant_id_number");
+
+                    b.ToTable("stock_transfers", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.StockTransferItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_variant_id");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity");
+
+                    b.Property<Guid>("StockTransferId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("stock_transfer_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("unit_cost");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_stock_transfer_items");
+
+                    b.HasIndex("ProductVariantId")
+                        .HasDatabaseName("ix_stock_transfer_items_product_variant_id");
+
+                    b.HasIndex("StockTransferId")
+                        .HasDatabaseName("ix_stock_transfer_items_stock_transfer_id");
+
+                    b.ToTable("stock_transfer_items", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.WarehouseStock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("AverageUnitCost")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("numeric(18,4)")
+                        .HasColumnName("average_unit_cost");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid>("ProductVariantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("product_variant_id");
+
+                    b.Property<decimal>("QuantityOnHand")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity_on_hand");
+
+                    b.Property<decimal>("QuantityReserved")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("numeric(18,3)")
+                        .HasColumnName("quantity_reserved");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<uint>("Version")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("xid")
+                        .HasColumnName("xmin");
+
+                    b.Property<Guid>("WarehouseId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("warehouse_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_warehouse_stocks");
+
+                    b.HasIndex("ProductVariantId")
+                        .HasDatabaseName("ix_warehouse_stocks_product_variant_id");
+
+                    b.HasIndex("TenantId", "ProductVariantId")
+                        .HasDatabaseName("ix_warehouse_stocks_tenant_id_product_variant_id");
+
+                    b.HasIndex("WarehouseId", "ProductVariantId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_warehouse_stocks_warehouse_id_product_variant_id");
+
+                    b.ToTable("warehouse_stocks", null, t =>
+                        {
+                            t.HasCheckConstraint("ck_warehouse_stocks_reserved_non_negative", "quantity_reserved >= 0");
+                        });
+                });
+
             modelBuilder.Entity("StockPilot.Domain.Tenancy.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1488,6 +1795,69 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                     b.ToTable("warehouses", (string)null);
                 });
 
+            modelBuilder.Entity("StockPilot.Infrastructure.Persistence.Configurations.TenantSequence", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("name");
+
+                    b.Property<long>("NextValue")
+                        .HasColumnType("bigint")
+                        .HasColumnName("next_value");
+
+                    b.HasKey("TenantId", "Name")
+                        .HasName("pk_tenant_sequences");
+
+                    b.ToTable("tenant_sequences", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Infrastructure.Persistence.IdempotencyRecord", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("key");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("RequestHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("request_hash");
+
+                    b.Property<string>("ResponseBody")
+                        .HasColumnType("text")
+                        .HasColumnName("response_body");
+
+                    b.Property<int?>("StatusCode")
+                        .HasColumnType("integer")
+                        .HasColumnName("status_code");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("TenantId", "Key")
+                        .HasName("pk_idempotency_records");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_idempotency_records_created_at");
+
+                    b.ToTable("idempotency_records", (string)null);
+                });
+
             modelBuilder.Entity("StockPilot.Domain.Catalog.Product", b =>
                 {
                     b.HasOne("StockPilot.Domain.Catalog.ProductCategory", "Category")
@@ -1611,6 +1981,74 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_user_warehouse_access_warehouses_warehouse_id");
                 });
 
+            modelBuilder.Entity("StockPilot.Domain.Inventory.InventoryTransaction", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Catalog.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_inventory_transactions_product_variants_product_variant_id");
+
+                    b.HasOne("StockPilot.Domain.Warehousing.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_inventory_transactions_warehouses_warehouse_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.StockTransfer", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Warehousing.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("DestinationWarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_transfers_warehouses_destination_warehouse_id");
+
+                    b.HasOne("StockPilot.Domain.Warehousing.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("SourceWarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_transfers_warehouses_source_warehouse_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.StockTransferItem", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Catalog.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_transfer_items_product_variants_product_variant_id");
+
+                    b.HasOne("StockPilot.Domain.Inventory.StockTransfer", null)
+                        .WithMany("Items")
+                        .HasForeignKey("StockTransferId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_stock_transfer_items_stock_transfers_stock_transfer_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.WarehouseStock", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Catalog.ProductVariant", null)
+                        .WithMany()
+                        .HasForeignKey("ProductVariantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_warehouse_stocks_product_variants_product_variant_id");
+
+                    b.HasOne("StockPilot.Domain.Warehousing.Warehouse", null)
+                        .WithMany()
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_warehouse_stocks_warehouses_warehouse_id");
+                });
+
             modelBuilder.Entity("StockPilot.Domain.Warehousing.Warehouse", b =>
                 {
                     b.HasOne("StockPilot.Domain.Tenancy.Tenant", null)
@@ -1619,6 +2057,16 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_warehouses_tenants_tenant_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Infrastructure.Persistence.Configurations.TenantSequence", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_tenant_sequences_tenants_tenant_id");
                 });
 
             modelBuilder.Entity("StockPilot.Domain.Catalog.Product", b =>
@@ -1631,6 +2079,11 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("StockPilot.Domain.Identity.Role", b =>
                 {
                     b.Navigation("Permissions");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Inventory.StockTransfer", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

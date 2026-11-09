@@ -71,8 +71,8 @@ public static class DatabaseInitializer
         var existingId = await db.Tenants.Where(t => t.Slug == slug).Select(t => (Guid?)t.Id).SingleOrDefaultAsync(ct);
         if (existingId is { } tenantId)
         {
-            // Company already exists: top up data added by later modules (idempotent).
-            await DemoCatalog.SeedAsync(db, tenantId, logger, ct);
+            // Company already exists: top up data added by later modules (each step is idempotent).
+            await SeedModuleDataAsync(db, tenantId, logger, ct);
             return;
         }
 
@@ -114,6 +114,17 @@ public static class DatabaseInitializer
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Seeded demo tenant '{Tenant}' with 4 users and 3 warehouses", tenant.Name);
 
-        await DemoCatalog.SeedAsync(db, tenant.Id, logger, ct);
+        await SeedModuleDataAsync(db, tenant.Id, logger, ct);
+    }
+
+    private static async Task SeedModuleDataAsync(AppDbContext db, Guid tenantId, ILogger logger, CancellationToken ct)
+    {
+        await DemoCatalog.SeedAsync(db, tenantId, logger, ct);
+
+        var ownerId = await db.Users.IgnoreQueryFilters()
+            .Where(u => u.TenantId == tenantId && u.RoleId == SystemRoles.OwnerId)
+            .Select(u => (Guid?)u.Id)
+            .FirstOrDefaultAsync(ct);
+        await DemoInventory.SeedAsync(db, tenantId, ownerId, logger, ct);
     }
 }

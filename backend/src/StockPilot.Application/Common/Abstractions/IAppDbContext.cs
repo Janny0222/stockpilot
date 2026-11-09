@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using StockPilot.Domain.Auditing;
 using StockPilot.Domain.Catalog;
 using StockPilot.Domain.Identity;
+using StockPilot.Domain.Inventory;
 using StockPilot.Domain.Tenancy;
 using StockPilot.Domain.Warehousing;
 
@@ -30,6 +31,17 @@ public interface IAppDbContext
     DbSet<Product> Products { get; }
     DbSet<ProductVariant> ProductVariants { get; }
     DbSet<ProductImage> ProductImages { get; }
+    DbSet<WarehouseStock> WarehouseStocks { get; }
+    DbSet<InventoryTransaction> InventoryTransactions { get; }
+    DbSet<StockTransfer> StockTransfers { get; }
+    DbSet<StockTransferItem> StockTransferItems { get; }
+
+    /// <summary>
+    /// Runs <paramref name="work"/> inside ONE database transaction, retrying the WHOLE unit of work on transient
+    /// failures (deadlock, serialization failure, dropped connection). Each attempt starts with an empty change
+    /// tracker, so a retry never sees half-applied state from the failed attempt.
+    /// </summary>
+    Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> work, CancellationToken cancellationToken);
 
     /// <summary>Change-tracking entry, used to apply a client's concurrency token before saving.</summary>
     EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

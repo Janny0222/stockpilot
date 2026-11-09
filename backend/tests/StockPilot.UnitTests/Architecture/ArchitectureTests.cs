@@ -45,6 +45,7 @@ public sealed partial class ArchitectureTests
             @"Application\Features\Platform\",
             @"Infrastructure\Identity\PermissionAndSessionServices.cs",
             @"Infrastructure\Persistence\Seed\", // startup seeding: server-controlled, no user input
+            @"Infrastructure\Inventory\",        // StockLocker: raw SQL with an explicit tenant_id predicate
         ];
 
         var offenders = Directory

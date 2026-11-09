@@ -38,8 +38,53 @@ public sealed class Warehouse : TenantEntity
 
     public void SetAddress(string? addressLine, string? city, string? country)
     {
-        AddressLine = addressLine?.Trim();
-        City = city?.Trim();
-        Country = country?.Trim();
+        AddressLine = string.IsNullOrWhiteSpace(addressLine) ? null : addressLine.Trim();
+        City = string.IsNullOrWhiteSpace(city) ? null : city.Trim();
+        Country = string.IsNullOrWhiteSpace(country) ? null : country.Trim();
+    }
+
+    public void Update(string code, string name)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            throw new DomainException("WAREHOUSE_CODE_REQUIRED", "Warehouse code is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException("WAREHOUSE_NAME_REQUIRED", "Warehouse name is required.");
+        }
+
+        Code = code.Trim().ToUpperInvariant();
+        Name = name.Trim();
+    }
+
+    /// <summary>The caller checks that no stock remains: archived warehouses can't hold or receive stock.</summary>
+    public void Archive()
+    {
+        if (IsDefault)
+        {
+            throw new DomainException("WAREHOUSE_IS_DEFAULT", "Make another warehouse the default before archiving this one.");
+        }
+
+        IsActive = false;
+    }
+
+    public void Restore() => IsActive = true;
+
+    internal void SetDefault(bool isDefault) => IsDefault = isDefault;
+
+    /// <summary>Exactly one default warehouse per company: switch it on one and off on all the others.</summary>
+    public static void MakeDefault(Warehouse target, IEnumerable<Warehouse> all)
+    {
+        if (!target.IsActive)
+        {
+            throw new DomainException("WAREHOUSE_ARCHIVED", "Restore the warehouse before making it the default.");
+        }
+
+        foreach (var warehouse in all)
+        {
+            warehouse.SetDefault(warehouse.Id == target.Id);
+        }
     }
 }

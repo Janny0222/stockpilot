@@ -4,6 +4,9 @@ import { CheckEmailPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage 
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { RegisterPage } from '@/features/auth/pages/register-page'
 import { DashboardPage } from '@/features/dashboard/dashboard-page'
+import { InventoryPage } from '@/features/inventory/pages/inventory-page'
+import { StockEntryPage } from '@/features/inventory/pages/stock-entry-page'
+import { NewTransferPage, TransferDetailPage } from '@/features/inventory/pages/transfer-pages'
 import { CategoriesPage } from '@/features/products/pages/categories-page'
 import { NewProductPage } from '@/features/products/pages/new-product-page'
 import { ProductDetailPage } from '@/features/products/pages/product-detail-page'
@@ -79,8 +82,18 @@ export const router = createBrowserRouter([
               { path: ':id', handle: crumb('Details'), element: <RequirePermission permission={P.Products.View}><ProductDetailPage /></RequirePermission> },
             ],
           },
+          {
+            path: 'inventory',
+            handle: crumb('Inventory'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Inventory.View}><InventoryPage /></RequirePermission> },
+              { path: 'stock-in', handle: crumb('Stock in'), element: <RequirePermission permission={P.Inventory.StockIn}><StockEntryPage mode="in" /></RequirePermission> },
+              { path: 'stock-out', handle: crumb('Stock out'), element: <RequirePermission permission={P.Inventory.StockOut}><StockEntryPage mode="out" /></RequirePermission> },
+              { path: 'transfers/new', handle: crumb('New transfer'), element: <RequirePermission permission={P.Inventory.Transfer}><NewTransferPage /></RequirePermission> },
+              { path: 'transfers/:id', handle: crumb('Transfer'), element: <RequirePermission permission={P.Inventory.View}><TransferDetailPage /></RequirePermission> },
+            ],
+          },
           { path: 'settings/account', handle: crumb('Account & sessions'), element: <AccountPage /> },
-          soon('inventory', 'Inventory', P.Inventory.View, 'Stock levels, stock-in and stock-out, adjustments, transfers and movement history.'),
           soon('purchases', 'Purchases', P.Purchases.View, 'Purchase orders from draft to approval to receiving, with partial deliveries.'),
           soon('sales', 'Sales', P.Sales.View, 'Sales orders with stock reservation and fulfilment.'),
           soon('suppliers', 'Suppliers', P.Suppliers.View, 'Supplier contacts and purchase history.'),

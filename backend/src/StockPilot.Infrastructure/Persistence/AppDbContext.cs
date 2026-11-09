@@ -8,6 +8,7 @@ using StockPilot.Domain.Auditing;
 using StockPilot.Domain.Catalog;
 using StockPilot.Domain.Common;
 using StockPilot.Domain.Identity;
+using StockPilot.Domain.Inventory;
 using StockPilot.Domain.Tenancy;
 using StockPilot.Domain.Warehousing;
 
@@ -37,6 +38,26 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
     public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
+    public DbSet<WarehouseStock> WarehouseStocks => Set<WarehouseStock>();
+    public DbSet<InventoryTransaction> InventoryTransactions => Set<InventoryTransaction>();
+    public DbSet<StockTransfer> StockTransfers => Set<StockTransfer>();
+    public DbSet<StockTransferItem> StockTransferItems => Set<StockTransferItem>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
+
+    public Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> work, CancellationToken cancellationToken)
+    {
+        // With EnableRetryOnFailure, a user-started transaction must run INSIDE the execution strategy,
+        // so a retry replays the whole thing (begin → work → commit), not just the failed statement.
+        var strategy = Database.CreateExecutionStrategy();
+        return strategy.ExecuteAsync(async ct =>
+        {
+            ChangeTracker.Clear();
+            await using var transaction = await Database.BeginTransactionAsync(ct);
+            var result = await work(ct);
+            await transaction.CommitAsync(ct);
+            return result;
+        }, cancellationToken);
+    }
 
     private static readonly Dictionary<string, (string Code, string Message)> UniqueConstraintMessages = new()
     {

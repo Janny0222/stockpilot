@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api/client'
-import type { PageParams, PagedResult, WarehouseDto } from '@/lib/api/types'
+import type { PageParams, PagedResult, SaveWarehouseCommand, WarehouseDto } from '@/lib/api/types'
 
 export type WarehouseListParams = PageParams & { isActive?: boolean }
 
@@ -26,5 +26,32 @@ export function useWarehouse(id: string) {
   return useQuery({
     queryKey: warehouseKeys.detail(id),
     queryFn: ({ signal }) => api.get<WarehouseDto>(`/warehouses/${id}`, { signal }).then((r) => r.data),
+  })
+}
+
+/** Active warehouses the user can work with: feeds the selects in stock forms (≤100 per company). */
+export function useActiveWarehouses() {
+  return useWarehouses({ page: 1, pageSize: 100, isActive: true })
+}
+
+function useInvalidateWarehouses() {
+  const queryClient = useQueryClient()
+  return () => queryClient.invalidateQueries({ queryKey: warehouseKeys.all })
+}
+
+export function useSaveWarehouse() {
+  const invalidate = useInvalidateWarehouses()
+  return useMutation({
+    mutationFn: ({ id, body }: { id?: string; body: SaveWarehouseCommand }) =>
+      (id ? api.put<WarehouseDto>(`/warehouses/${id}`, body) : api.post<WarehouseDto>('/warehouses', body)).then((r) => r.data),
+    onSuccess: invalidate,
+  })
+}
+
+export function useWarehouseAction(id: string) {
+  const invalidate = useInvalidateWarehouses()
+  return useMutation({
+    mutationFn: (action: 'archive' | 'restore' | 'default') => api.post(`/warehouses/${id}/${action}`),
+    onSuccess: invalidate,
   })
 }
