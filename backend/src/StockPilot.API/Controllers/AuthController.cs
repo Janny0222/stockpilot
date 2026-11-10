@@ -128,6 +128,26 @@ public sealed class AuthController(IHostEnvironment environment) : ControllerBas
         return NoContent();
     }
 
+    /// <summary>Who invited whom, for the accept page. POST so the token never lands in a URL or access log.</summary>
+    [HttpPost("invitation")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    [ProducesResponseType<InvitationDto>(StatusCodes.Status200OK)]
+    public Task<InvitationDto> Invitation(TokenRequest request, [FromServices] GetInvitationHandler handler, CancellationToken ct) =>
+        handler.Handle(request.Token, ct);
+
+    /// <summary>Sets the first password and signs the new user in (same response and cookie as login).</summary>
+    [HttpPost("accept-invitation")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    [ProducesResponseType<AccessTokenResponse>(StatusCodes.Status200OK)]
+    public async Task<AccessTokenResponse> AcceptInvitation(
+        AcceptInvitationCommand command, [FromServices] AcceptInvitationHandler handler, CancellationToken ct)
+    {
+        var result = await handler.Handle(command, ct);
+        return IssueSession(result);
+    }
+
     [HttpGet("me")]
     [ProducesResponseType<MeResponse>(StatusCodes.Status200OK)]
     public Task<MeResponse> Me([FromServices] GetCurrentUserHandler handler, CancellationToken ct) => handler.Handle(ct);

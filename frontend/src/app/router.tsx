@@ -1,6 +1,7 @@
 import { Navigate, createBrowserRouter } from 'react-router'
 import { AccountPage } from '@/features/account/account-page'
 import { CheckEmailPage, ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/pages/email-pages'
+import { AcceptInvitationPage } from '@/features/auth/pages/accept-invitation-page'
 import { LoginPage } from '@/features/auth/pages/login-page'
 import { RegisterPage } from '@/features/auth/pages/register-page'
 import { DashboardPage } from '@/features/dashboard/dashboard-page'
@@ -14,6 +15,10 @@ import { PurchaseOrdersPage } from '@/features/purchasing/pages/purchase-orders-
 import { SupplierDetailPage, SuppliersPage } from '@/features/purchasing/pages/suppliers-pages'
 import { ReportPage, ReportsPage } from '@/features/reports/reports-pages'
 import { CustomerDetailPage, CustomersPage } from '@/features/sales/pages/customers-pages'
+import { AuditLogPage } from '@/features/settings/audit-log-page'
+import { CompanySettingsPage } from '@/features/settings/company-page'
+import { SettingsLayout } from '@/features/settings/settings-layout'
+import { UserDetailPage, UsersPage } from '@/features/settings/users-pages'
 import { SalesOrderDetailPage } from '@/features/sales/pages/sales-order-detail-page'
 import { SalesOrderFormPage } from '@/features/sales/pages/sales-order-form-page'
 import { SalesOrdersPage } from '@/features/sales/pages/sales-orders-page'
@@ -62,6 +67,7 @@ export const router = createBrowserRouter([
   // Email links work whether or not someone is signed in on this browser.
   { path: '/verify-email', element: <VerifyEmailPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
+  { path: '/accept-invitation', element: <AcceptInvitationPage /> },
 
   // The application.
   {
@@ -138,7 +144,25 @@ export const router = createBrowserRouter([
               { path: ':id', handle: crumb('Customer'), element: <RequirePermission permission={P.Customers.View}><CustomerDetailPage /></RequirePermission> },
             ],
           },
-          { path: 'settings/account', handle: crumb('Account & sessions'), element: <AccountPage /> },
+          {
+            path: 'settings',
+            handle: crumb('Settings'),
+            element: <SettingsLayout />,
+            children: [
+              { index: true, element: <Navigate to="/settings/account" replace /> },
+              { path: 'account', handle: crumb('Your account'), element: <AccountPage /> },
+              { path: 'company', handle: crumb('Company'), element: <RequirePermission permission={P.Company.Manage}><CompanySettingsPage /></RequirePermission> },
+              {
+                path: 'users',
+                handle: crumb('Users'),
+                children: [
+                  { index: true, element: <RequirePermission permission={P.Users.Manage}><UsersPage /></RequirePermission> },
+                  { path: ':id', handle: crumb('User'), element: <RequirePermission permission={P.Users.Manage}><UserDetailPage /></RequirePermission> },
+                ],
+              },
+              { path: 'audit-log', handle: crumb('Audit log'), element: <RequirePermission permission={P.Audit.View}><AuditLogPage /></RequirePermission> },
+            ],
+          },
           {
             path: 'reports',
             handle: crumb('Reports'),

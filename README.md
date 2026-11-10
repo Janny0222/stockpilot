@@ -6,8 +6,9 @@ ASP.NET Core 10 · Clean Architecture · EF Core + PostgreSQL · JWT with refres
 > **Status:** Phase 4 in progress: **Products**, **Warehouses + Inventory**, **Suppliers + Purchasing** and
 > **Customers + Sales** done: stock in/out, adjustments, transfers, movement ledger, row-locked concurrency (no
 > overselling), idempotent writes, purchase orders with partial receiving, sales orders that reserve stock on
-> confirm and ship it out with cost of goods and margin, and a **dashboard with charts and 5 reports (CSV export)**
-> built only from real data.
+> confirm and ship it out with cost of goods and margin, a **dashboard with charts and 5 reports (CSV export)**
+> built only from real data, and **Settings**: invite users by email, scope them to warehouses, deactivate them,
+> company settings and an audit log viewer.
 > Phase 3 (frontend foundation) complete. Backend: authentication, tenant isolation, roles and
 > permissions, auditing, logging and API docs (102 tests). Frontend: design system, responsive app shell, every auth
 > flow, role-based navigation, and the Warehouses and Account pages on the real API (26 tests).

@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<Features.Warehouses.WarehouseAccessService>();
         services.AddScoped<Features.Inventory.StockOperations>();
         services.AddScoped<Features.Reports.ReportClock>();
+        services.AddScoped<Features.Settings.UserAssignment>();
         services.AddScoped<Features.Auth.Common.AuthTokenIssuer>();
         services.AddScoped<Features.Auth.Common.AuthEmailService>();
 

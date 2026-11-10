@@ -14,6 +14,7 @@ public static class AuditEvents
     public const string RefreshTokenReuseDetected = "Auth.RefreshTokenReuseDetected";
     public const string PasswordReset = "Auth.PasswordReset";
     public const string LoggedOutEverywhere = "Auth.LoggedOutEverywhere";
+    public const string InvitationAccepted = "Auth.InvitationAccepted";
 
     public static void Record(
         this IAppDbContext db, ICurrentUser currentUser, TimeProvider clock,

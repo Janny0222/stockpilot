@@ -40,6 +40,16 @@ public sealed class AuthEmailService(
             footer: $"This link expires in {options.Value.PasswordResetTokenLifetime.TotalMinutes:0} minutes.",
             ct);
 
+    public Task SendInvitationAsync(User user, string inviterName, string companyName, string rawToken, CancellationToken ct) =>
+        SendAsync(
+            user,
+            subject: $"You're invited to {companyName} on StockPilot",
+            intro: $"{inviterName} invited you to join {companyName} on StockPilot. Choose a password to get started.",
+            actionText: "Accept invitation",
+            url: $"{BaseUrl}/accept-invitation#token={Uri.EscapeDataString(rawToken)}",
+            footer: $"This invitation expires in {options.Value.InvitationTokenLifetime.TotalDays:0} days.",
+            ct);
+
     private string BaseUrl => options.Value.FrontendBaseUrl.TrimEnd('/');
 
     private async Task SendAsync(
@@ -50,7 +60,7 @@ public sealed class AuthEmailService(
             <div style="font-family:Segoe UI,Arial,sans-serif;max-width:520px;margin:auto;color:#0f172a">
               <h2 style="color:#4f46e5">StockPilot</h2>
               <p>Hi {name},</p>
-              <p>{intro}</p>
+              <p>{WebUtility.HtmlEncode(intro)}</p>
               <p><a href="{WebUtility.HtmlEncode(url)}" style="display:inline-block;background:#4f46e5;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">{actionText}</a></p>
               <p style="color:#64748b;font-size:13px">{footer}</p>
             </div>

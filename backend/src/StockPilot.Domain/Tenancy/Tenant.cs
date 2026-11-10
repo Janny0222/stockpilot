@@ -51,6 +51,23 @@ public sealed class Tenant : AuditableEntity
 
     public bool IsActive => Status == TenantStatus.Active;
 
+    /// <summary>
+    /// Company settings. Currency is passed separately: it may only change while there are no stock movements
+    /// (every stored cost and price is in it), which the use case checks because it needs the database.
+    /// </summary>
+    public void UpdateProfile(string name, string currency, string timeZone, bool allowNegativeStock)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new DomainException("TENANT_NAME_REQUIRED", "Company name is required.");
+        }
+
+        Name = name.Trim();
+        Currency = currency.ToUpperInvariant();
+        TimeZone = timeZone;
+        AllowNegativeStock = allowNegativeStock;
+    }
+
     public void Suspend() => Status = TenantStatus.Suspended;
 
     public void Activate() => Status = TenantStatus.Active;

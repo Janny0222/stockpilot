@@ -1,5 +1,5 @@
 import { api } from '@/lib/api/client'
-import type { AccessTokenResponse, MeResponse, RegisterCompanyCommand, RegisterCompanyResult, SessionDto } from '@/lib/api/types'
+import type { AccessTokenResponse, InvitationDto, MeResponse,RegisterCompanyCommand, RegisterCompanyResult, SessionDto } from '@/lib/api/types'
 
 export const authApi = {
   login: (body: { email: string; password: string }) =>
@@ -17,6 +17,10 @@ export const authApi = {
   resendVerification: (email: string) => api.post('/auth/resend-verification', { email }),
   forgotPassword: (email: string) => api.post('/auth/forgot-password', { email }),
   resetPassword: (body: { token: string; newPassword: string }) => api.post('/auth/reset-password', body),
+
+  invitation: (token: string) => api.post<InvitationDto>('/auth/invitation', { token }).then((r) => r.data),
+  acceptInvitation: (body: { token: string; password: string }) =>
+    api.post<AccessTokenResponse>('/auth/accept-invitation', body).then((r) => r.data),
 
   sessions: () => api.get<SessionDto[]>('/auth/sessions').then((r) => r.data),
   revokeSession: (id: string) => api.delete(`/auth/sessions/${id}`),

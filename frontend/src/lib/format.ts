@@ -32,3 +32,11 @@ const dateFormatter = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium' })
 
 /** A calendar date from the API (yyyy-mm-dd), shown as e.g. Nov 9, 2026. Parsed as LOCAL midnight so it never shifts a day. */
 export const formatDate = (iso: string | null | undefined) => (iso ? dateFormatter.format(new Date(`${iso}T00:00:00`)) : '—')
+
+const dateTimeFormatter = new Intl.DateTimeFormat('en-PH', { dateStyle: 'medium', timeStyle: 'short' })
+
+/** For instants (timestamps with a time and offset), shown in the viewer's local time. */
+export const formatDateTime = (iso: string | null | undefined) => (iso ? dateTimeFormatter.format(new Date(iso)) : '—')
+
+/** The calendar day of an instant, in the viewer's local time. */
+export const formatDay = (iso: string | null | undefined) => (iso ? dateFormatter.format(new Date(iso)) : '—')

@@ -65,6 +65,9 @@ public sealed class User : AuditableEntity
     public DateTimeOffset? LastLoginAt { get; private set; }
 
     public bool IsPlatformAdmin => TenantId is null;
+
+    /// <summary>Invited but hasn't accepted yet: no password has ever been set.</summary>
+    public bool IsInvitationPending => PasswordHash is null;
     public string FullName => $"{FirstName} {LastName}".Trim();
 
     public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
@@ -111,6 +114,12 @@ public sealed class User : AuditableEntity
     }
 
     public void Activate() => IsActive = true;
+
+    public void Rename(string firstName, string lastName)
+    {
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
+    }
 
     public void ChangeRole(Guid roleId)
     {

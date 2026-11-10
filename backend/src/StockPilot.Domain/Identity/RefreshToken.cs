@@ -10,6 +10,7 @@ public enum RefreshTokenRevokeReason
     ReuseDetected = 4,
     PasswordChanged = 5,
     SessionRevoked = 6,
+    UserDeactivated = 7,
 }
 
 /// <summary>

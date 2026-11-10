@@ -42,7 +42,7 @@ export const platformNav: NavItem[] = [
 ]
 
 /** Settings is visible to everyone: every user can manage their own account and sessions. */
-export const settingsNav: NavItem = { to: '/settings/account', label: 'Settings', icon: Settings, permission: '', available: true }
+export const settingsNav: NavItem = { to: '/settings',label: 'Settings', icon: Settings, permission: '', available: true }
 
 export const platformIcon = ShieldCheck
 

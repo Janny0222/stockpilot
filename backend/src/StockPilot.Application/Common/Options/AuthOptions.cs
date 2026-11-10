@@ -17,6 +17,7 @@ public sealed class AuthOptions
 
     public TimeSpan EmailVerificationTokenLifetime { get; set; } = TimeSpan.FromHours(24);
     public TimeSpan PasswordResetTokenLifetime { get; set; } = TimeSpan.FromHours(1);
+    public TimeSpan InvitationTokenLifetime { get; set; } = TimeSpan.FromDays(7);
     public int MaxFailedLoginAttempts { get; set; } = 5;
     public TimeSpan LockoutDuration { get; set; } = TimeSpan.FromMinutes(15);
 

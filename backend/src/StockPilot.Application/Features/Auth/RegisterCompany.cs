@@ -59,7 +59,7 @@ public sealed class RegisterCompanyHandler(
         var email = User.NormalizeEmail(command.Email);
 
         // Users are tenant-filtered. A registering visitor has no tenant, so look across all tenants.
-        if (await db.Users.IgnoreQueryFilters().AnyAsync(u => u.Email == email, ct))
+        if (await EmailAvailability.IsTakenAsync(db, email, ct))
         {
             throw new ConflictException("EMAIL_TAKEN", "An account with this email already exists.");
         }

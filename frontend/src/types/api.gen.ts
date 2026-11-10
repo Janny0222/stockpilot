@@ -356,6 +356,90 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/invitation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Who invited whom, for the accept page. POST so the token never lands in a URL or access log. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["TokenRequest"];
+                    "text/json": components["schemas"]["TokenRequest"];
+                    "application/*+json": components["schemas"]["TokenRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InvitationDto"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/accept-invitation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sets the first password and signs the new user in (same response and cookie as login). */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AcceptInvitationCommand"];
+                    "text/json": components["schemas"]["AcceptInvitationCommand"];
+                    "application/*+json": components["schemas"]["AcceptInvitationCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccessTokenResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/me": {
         parameters: {
             query?: never;
@@ -2602,6 +2686,438 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/settings/company": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CompanySettingsDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateCompanySettingsCommand"];
+                    "text/json": components["schemas"]["UpdateCompanySettingsCommand"];
+                    "application/*+json": components["schemas"]["UpdateCompanySettingsCommand"];
+                };
+            };
+            responses: {
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Status?: components["schemas"]["UserStatus"];
+                    RoleId?: string;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfUserDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Invites someone by email. They choose their own password from the link. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["InviteUserCommand"];
+                    "text/json": components["schemas"]["InviteUserCommand"];
+                    "application/*+json": components["schemas"]["InviteUserCommand"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserDto"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateUserCommand"];
+                    "text/json": components["schemas"]["UpdateUserCommand"];
+                    "application/*+json": components["schemas"]["UpdateUserCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserDto"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/resend-invitation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RolesOverviewDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    EntityType?: string;
+                    Action?: string;
+                    UserId?: string;
+                    /** @description Company-local dates (inclusive), like reports. */
+                    From?: string;
+                    To?: string;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfAuditLogDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/audit-logs/filters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AuditFiltersDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/warehouses": {
         parameters: {
             query?: never;
@@ -2858,6 +3374,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AcceptInvitationCommand: {
+            token: string;
+            password: string;
+        };
         AccessTokenResponse: {
             accessToken: string;
             /** Format: date-time */
@@ -2875,6 +3395,36 @@ export interface components {
         };
         /** @enum {unknown} */
         AdjustmentReason: "CountCorrection" | "Damaged" | "Lost" | "Found" | "Expired" | "Other" | null;
+        /** @description One changed field. Values are display strings; null means "empty" (or "not set"). */
+        AuditChangeDto: {
+            field: string;
+            old: null | string;
+            new: null | string;
+        };
+        /** @description Filter options: only entity types and people that actually appear in this company's log. */
+        AuditFiltersDto: {
+            entityTypes: string[];
+            users: components["schemas"]["AuditUserOptionDto"][];
+        };
+        AuditLogDto: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurredAt: string;
+            action: string;
+            entityType: string;
+            entityId: null | string;
+            /** Format: uuid */
+            userId: null | string;
+            userName: null | string;
+            ipAddress: null | string;
+            changes: components["schemas"]["AuditChangeDto"][];
+        };
+        AuditUserOptionDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+        };
         CancelPurchaseOrderCommand: {
             reason: string;
         };
@@ -2890,6 +3440,19 @@ export interface components {
             parentId: null | string;
             /** Format: int32 */
             productCount: number;
+        };
+        /** @description CurrencyLocked is true once stock has moved: every stored cost and price is in the current currency. */
+        CompanySettingsDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            slug: string;
+            currency: string;
+            timeZone: string;
+            allowNegativeStock: boolean;
+            currencyLocked: boolean;
+            /** Format: date-time */
+            createdAt: string;
         };
         CreateProductCommand: {
             name: string;
@@ -2944,6 +3507,22 @@ export interface components {
         IFormFile: string;
         /** @enum {unknown} */
         InventoryMovementType: "StockIn" | "StockOut" | "AdjustmentIncrease" | "AdjustmentDecrease" | "TransferOut" | "TransferIn" | "PurchaseReceipt" | "SalesFulfilment";
+        /** @description What the "accept invitation" page shows before the invitee picks a password. */
+        InvitationDto: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            companyName: string;
+            roleName: string;
+        };
+        InviteUserCommand: {
+            email: string;
+            firstName: string;
+            lastName: string;
+            /** Format: uuid */
+            roleId: string;
+            warehouseIds: null | string[];
+        };
         LoginCommand: {
             email: string;
             password: string;
@@ -3015,6 +3594,18 @@ export interface components {
             quantityChange: number;
             /** Format: double */
             quantityAfter: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfAuditLogDto: {
+            items: components["schemas"]["AuditLogDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
         };
         /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfCustomerDto: {
@@ -3113,6 +3704,18 @@ export interface components {
             totalPages?: number;
         };
         /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfUserDto: {
+            items: components["schemas"]["UserDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfWarehouseDto: {
             items: components["schemas"]["WarehouseDto"][];
             /** Format: int32 */
@@ -3123,6 +3726,11 @@ export interface components {
             totalCount: number;
             /** Format: int32 */
             totalPages?: number;
+        };
+        PermissionDto: {
+            code: string;
+            group: string;
+            description: string;
         };
         ProblemDetails: {
             type?: null | string;
@@ -3377,6 +3985,18 @@ export interface components {
         ResetPasswordCommand: {
             token: string;
             newPassword: string;
+        };
+        RoleOptionDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            restrictToAssignedWarehouses: boolean;
+            isSystem: boolean;
+            permissions: string[];
+        };
+        RolesOverviewDto: {
+            roles: components["schemas"]["RoleOptionDto"][];
+            permissions: components["schemas"]["PermissionDto"][];
         };
         SalesLineInput: {
             /** Format: uuid */
@@ -3757,6 +4377,12 @@ export interface components {
             lines: components["schemas"]["TransferLine"][];
             note: null | string;
         };
+        UpdateCompanySettingsCommand: {
+            name: string;
+            currency: string;
+            timeZone: string;
+            allowNegativeStock: boolean;
+        };
         UpdateProductCommand: {
             name: string;
             description: null | string;
@@ -3765,6 +4391,13 @@ export interface components {
             unitOfMeasure: string;
             /** Format: uint32 */
             version: number;
+        };
+        UpdateUserCommand: {
+            firstName: string;
+            lastName: string;
+            /** Format: uuid */
+            roleId: string;
+            warehouseIds: null | string[];
         };
         UpdateVariantCommand: {
             sku: string;
@@ -3778,6 +4411,33 @@ export interface components {
             reorderLevel: number;
             /** Format: uint32 */
             version: number;
+        };
+        /** @description IsYou marks the signed-in user: the UI hides "deactivate" and the role picker for yourself. */
+        UserDto: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            /** Format: uuid */
+            roleId: string;
+            roleName: string;
+            restrictToAssignedWarehouses: boolean;
+            status: components["schemas"]["UserStatus"];
+            /** Format: date-time */
+            lastLoginAt: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            warehouses: components["schemas"]["UserWarehouseDto"][];
+            isYou: boolean;
+        };
+        /** @enum {unknown} */
+        UserStatus: "Active" | "Invited" | "Deactivated";
+        UserWarehouseDto: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
         };
         /** @description CostPrice is null when the caller may not see costs (Sales Staff). */
         VariantDto: {

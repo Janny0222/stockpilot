@@ -9,6 +9,11 @@ import { server } from './server'
 // A request with no matching handler fails the test, so a typo'd URL can't pass silently.
 beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 
+// jsdom lacks the pointer-capture and scrolling APIs Radix Select calls when it opens.
+Element.prototype.hasPointerCapture ??= () => false
+Element.prototype.releasePointerCapture ??= () => {}
+Element.prototype.scrollIntoView ??= () => {}
+
 afterEach(() => {
   server.resetHandlers()
   cleanup()

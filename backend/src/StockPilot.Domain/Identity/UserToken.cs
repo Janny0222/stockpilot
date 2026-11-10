@@ -1,4 +1,4 @@
-using StockPilot.Domain.Common;
+﻿using StockPilot.Domain.Common;
 
 namespace StockPilot.Domain.Identity;
 
@@ -6,6 +6,9 @@ public enum UserTokenPurpose
 {
     EmailVerification = 1,
     PasswordReset = 2,
+
+    /// <summary>Sent when an Owner invites someone; accepting it sets the first password.</summary>
+    Invitation = 3,
 }
 
 /// <summary>
