@@ -34,7 +34,7 @@ export const tenantNav: NavItem[] = [
   { to: '/customers', label: 'Customers', icon: Users, permission: P.Customers.View, available: true },
   { to: '/warehouses', label: 'Warehouses', icon: Warehouse, permission: P.Warehouses.View, available: true },
   { to: '/suppliers', label: 'Suppliers', icon: Truck, permission: P.Suppliers.View, available: true },
-  { to: '/reports', label: 'Reports', icon: ChartColumn, permission: P.Reports.View, available: false },
+  { to: '/reports', label: 'Reports', icon: ChartColumn, permission: P.Reports.View, available: true },
 ]
 
 export const platformNav: NavItem[] = [

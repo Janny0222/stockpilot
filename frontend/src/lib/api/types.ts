@@ -72,3 +72,10 @@ export type PageParams = {
   search?: string
   sort?: string
 }
+export type DashboardDto = Schemas['DashboardDto']
+export type SalesTrendPointDto = Schemas['SalesTrendPointDto']
+export type TopProductDto = Schemas['TopProductDto']
+export type WarehouseStockDto = Schemas['WarehouseStockDto']
+export type ReportTableDto = Schemas['ReportTableDto']
+export type ReportColumnDto = Schemas['ReportColumnDto']
+export type ReportColumnKind = Schemas['ReportColumnKind']

@@ -26,6 +26,9 @@ RUN dotnet publish backend/src/StockPilot.API/StockPilot.API.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS runtime
 WORKDIR /app
 COPY --from=build /app .
+# Chiseled images ship without tzdata. Reports and the dashboard group sales by the company's local day
+# (e.g. Asia/Manila), which needs the IANA zone files: copy them from the SDK image (~4 MB).
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
 
 ENV ASPNETCORE_HTTP_PORTS=8080 \
     DOTNET_gcServer=0 \

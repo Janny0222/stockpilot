@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<Features.Catalog.PermissionCheckerAccessor>();
         services.AddScoped<Features.Warehouses.WarehouseAccessService>();
         services.AddScoped<Features.Inventory.StockOperations>();
+        services.AddScoped<Features.Reports.ReportClock>();
         services.AddScoped<Features.Auth.Common.AuthTokenIssuer>();
         services.AddScoped<Features.Auth.Common.AuthEmailService>();
 

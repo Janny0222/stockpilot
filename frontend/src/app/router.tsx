@@ -12,6 +12,7 @@ import { PurchaseOrderDetailPage } from '@/features/purchasing/pages/purchase-or
 import { PurchaseOrderFormPage } from '@/features/purchasing/pages/purchase-order-form-page'
 import { PurchaseOrdersPage } from '@/features/purchasing/pages/purchase-orders-page'
 import { SupplierDetailPage, SuppliersPage } from '@/features/purchasing/pages/suppliers-pages'
+import { ReportPage, ReportsPage } from '@/features/reports/reports-pages'
 import { CustomerDetailPage, CustomersPage } from '@/features/sales/pages/customers-pages'
 import { SalesOrderDetailPage } from '@/features/sales/pages/sales-order-detail-page'
 import { SalesOrderFormPage } from '@/features/sales/pages/sales-order-form-page'
@@ -138,7 +139,14 @@ export const router = createBrowserRouter([
             ],
           },
           { path: 'settings/account', handle: crumb('Account & sessions'), element: <AccountPage /> },
-          soon('reports', 'Reports', P.Reports.View, 'Inventory valuation, sales, purchases and stock movement reports with CSV export.'),
+          {
+            path: 'reports',
+            handle: crumb('Reports'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Reports.View}><ReportsPage /></RequirePermission> },
+              { path: ':key', handle: crumb('Report'), element: <RequirePermission permission={P.Reports.View}><ReportPage /></RequirePermission> },
+            ],
+          },
           soon('platform', 'Companies', P.Platform.TenantsView, 'Registered companies, with suspend and activate controls.'),
           { path: '*', element: <NotFoundPage /> },
         ],

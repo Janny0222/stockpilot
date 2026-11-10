@@ -2004,6 +2004,138 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Real aggregates only. Sections the caller's role can't see come back as null. */
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Length of the period, ending today (company time zone). 7, 30 or 90. */
+                    Days?: number;
+                    WarehouseId?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DashboardDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** inventory-valuation | low-stock | sales | purchases | stock-movements */
+        get: {
+            parameters: {
+                query?: {
+                    From?: string;
+                    To?: string;
+                    WarehouseId?: string;
+                    /** @description sales: product | customer | day. purchases: supplier | product. */
+                    GroupBy?: string;
+                    /** @description stock-movements only. */
+                    Type?: components["schemas"]["InventoryMovementType"];
+                };
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ReportTableDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/reports/{key}/csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    From?: string;
+                    To?: string;
+                    WarehouseId?: string;
+                    /** @description sales: product | customer | day. purchases: supplier | product. */
+                    GroupBy?: string;
+                    /** @description stock-movements only. */
+                    Type?: components["schemas"]["InventoryMovementType"];
+                };
+                header?: never;
+                path: {
+                    key: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                        "text/csv": unknown;
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customers": {
         parameters: {
             query?: never;
@@ -2789,6 +2921,22 @@ export interface components {
             /** Format: double */
             totalSales: number;
         };
+        /** @description Each section is null when the user's role can't see it (e.g. Sales Staff get no stock value). */
+        DashboardDto: {
+            /** Format: int32 */
+            days: number;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            canViewCost: boolean;
+            stock: null | components["schemas"]["StockSummaryDto"];
+            sales: null | components["schemas"]["SalesSummaryDto"];
+            purchasing: null | components["schemas"]["PurchasingSummaryDto"];
+            salesTrend: null | components["schemas"]["SalesTrendPointDto"][];
+            topProducts: null | components["schemas"]["TopProductDto"][];
+            stockByWarehouse: null | components["schemas"]["WarehouseStockDto"][];
+        };
         EmailRequest: {
             email: string;
         };
@@ -3131,6 +3279,18 @@ export interface components {
         };
         /** @enum {unknown} */
         PurchaseOrderStatus: "Draft" | "Submitted" | "Approved" | "PartiallyReceived" | "Received" | "Cancelled";
+        PurchasingSummaryDto: {
+            /** Format: int32 */
+            openOrders: number;
+            /** Format: int32 */
+            awaitingApproval: number;
+            /** Format: int32 */
+            overdue: number;
+            /** Format: double */
+            incomingUnits: number;
+            /** Format: double */
+            incomingValue: null | number;
+        };
         ReceiptDto: {
             /** Format: uuid */
             id: string;
@@ -3188,6 +3348,31 @@ export interface components {
             /** Format: uuid */
             userId: string;
             emailVerificationRequired: boolean;
+        };
+        ReportColumnDto: {
+            key: string;
+            label: string;
+            kind: components["schemas"]["ReportColumnKind"];
+        };
+        /** @enum {unknown} */
+        ReportColumnKind: "Text" | "Quantity" | "Money" | "Percent" | "Date" | "DateTime";
+        /**
+         * @description Every report has the same shape: columns + rows (+ totals). One screen renders them all and one writer turns
+         *     them into CSV, so a new report is just a new query. Cost columns are simply left out for roles without
+         *     inventory.view_cost.
+         */
+        ReportTableDto: {
+            key: string;
+            title: string;
+            description: string;
+            /** Format: date */
+            from: null | string;
+            /** Format: date */
+            to: null | string;
+            columns: components["schemas"]["ReportColumnDto"][];
+            rows: unknown[][];
+            totals: null | unknown[];
+            truncated: boolean;
         };
         ResetPasswordCommand: {
             token: string;
@@ -3290,6 +3475,31 @@ export interface components {
             grossProfit: number;
             /** Format: double */
             marginPercent: null | number;
+        };
+        /** @description Revenue is recognised when goods SHIP (not when an order is taken), so it always has a matching cost. */
+        SalesSummaryDto: {
+            /** Format: double */
+            revenue: number;
+            /** Format: double */
+            previousRevenue: number;
+            /** Format: int32 */
+            ordersShipped: number;
+            /** Format: int32 */
+            openOrders: number;
+            /** Format: double */
+            grossProfit: null | number;
+            /** Format: double */
+            previousGrossProfit: null | number;
+            /** Format: double */
+            marginPercent: null | number;
+        };
+        SalesTrendPointDto: {
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            revenue: number;
+            /** Format: double */
+            grossProfit: null | number;
         };
         SaveCategoryCommand: {
             name: string;
@@ -3440,6 +3650,20 @@ export interface components {
         };
         /** @enum {unknown} */
         StockStatus: "InStock" | "Low" | "Out";
+        StockSummaryDto: {
+            /** Format: double */
+            value: null | number;
+            /** Format: double */
+            units: number;
+            /** Format: double */
+            reservedUnits: number;
+            /** Format: int32 */
+            itemsInStock: number;
+            /** Format: int32 */
+            lowStock: number;
+            /** Format: int32 */
+            outOfStock: number;
+        };
         SupplierDto: {
             /** Format: uuid */
             id: string;
@@ -3460,6 +3684,15 @@ export interface components {
         };
         TokenRequest: {
             token: string;
+        };
+        TopProductDto: {
+            /** Format: uuid */
+            productId: string;
+            productName: string;
+            /** Format: double */
+            quantity: number;
+            /** Format: double */
+            revenue: number;
         };
         TransferDetailDto: {
             /** Format: uuid */
@@ -3618,6 +3851,20 @@ export interface components {
         WarehouseScopeDto: {
             restricted: boolean;
             warehouseIds: string[];
+        };
+        WarehouseStockDto: {
+            /** Format: uuid */
+            warehouseId: string;
+            code: string;
+            name: string;
+            /** Format: double */
+            units: number;
+            /** Format: double */
+            value: null | number;
+            /** Format: int32 */
+            lowStock: number;
+            /** Format: int32 */
+            outOfStock: number;
         };
     };
     responses: never;
