@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +30,11 @@ internal static class ApiServiceExtensions
     {
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, HttpContextCurrentUser>();
+
+        // Live notifications. Enums as strings, like the REST API, so the client sees the same NotificationDto shape.
+        services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, Realtime.UserIdProvider>();
+        services.Replace(ServiceDescriptor.Singleton<IRealtimeNotifier, Realtime.SignalRRealtimeNotifier>());
 
         // Strict numbers ("5" is not accepted as 5) and enums as strings ("Active", not 1).
         // Set for both MVC (controllers) and the minimal-API options the OpenAPI generator reads,
@@ -115,6 +121,19 @@ internal static class ApiServiceExtensions
                 };
                 options.Events = new JwtBearerEvents
                 {
+                    // Browsers can't set headers on a WebSocket, so SignalR sends the token as ?access_token=. Accept
+                    // that ONLY on the hub path; every other endpoint still requires the Authorization header. Request
+                    // logging records the path, not the query string, so the token doesn't land in logs.
+                    OnMessageReceived = ctx =>
+                    {
+                        if (ctx.HttpContext.Request.Path.StartsWithSegments(Realtime.NotificationsHub.Path) &&
+                            ctx.Request.Query["access_token"] is { Count: > 0 } token)
+                        {
+                            ctx.Token = token.ToString();
+                        }
+
+                        return Task.CompletedTask;
+                    },
                     // A signature-valid token is not enough: the user may have been deactivated, changed
                     // their password, or their company suspended since the token was issued.
                     OnTokenValidated = async ctx =>

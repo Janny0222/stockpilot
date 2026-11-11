@@ -22,7 +22,8 @@ export default defineConfig({
     // where a Cloudflare Pages Function plays this proxy role.
     proxy: {
       // API_PROXY_TARGET lets you point the dev server at another API instance (e.g. a second port).
-      '/api': { target: process.env.API_PROXY_TARGET ?? 'http://localhost:5078', changeOrigin: true },
+      // ws: true also forwards WebSocket upgrades (the live notifications hub lives under /api).
+      '/api': { target: process.env.API_PROXY_TARGET ?? 'http://localhost:5078', changeOrigin: true, ws: true },
     },
   },
   test: {

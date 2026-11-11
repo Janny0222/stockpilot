@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StockPilot.Application.Common.Abstractions;
@@ -38,6 +39,9 @@ public static class DependencyInjection
         // ---- Persistence
         services.AddScoped<TenantIsolationInterceptor>();
         services.AddScoped<AuditingInterceptor>();
+        // Scoped: it holds the notifications of THIS unit of work until its transaction commits.
+        services.AddScoped<NotificationDispatchInterceptor>();
+        services.TryAddSingleton<IRealtimeNotifier, NullRealtimeNotifier>(); // the API replaces it with SignalR
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
             options.UseNpgsql(connectionString, npgsql =>
@@ -49,7 +53,8 @@ public static class DependencyInjection
                 .UseSnakeCaseNamingConvention()
                 .AddInterceptors(
                     sp.GetRequiredService<TenantIsolationInterceptor>(),
-                    sp.GetRequiredService<AuditingInterceptor>());
+                    sp.GetRequiredService<AuditingInterceptor>(),
+                    sp.GetRequiredService<NotificationDispatchInterceptor>());
 
             if (environment.IsDevelopment())
             {

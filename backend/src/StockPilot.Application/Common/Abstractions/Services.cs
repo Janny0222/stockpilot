@@ -97,3 +97,17 @@ public interface IImageProcessor
 {
     Task<ProcessedImage> ProcessAsync(Stream input, CancellationToken cancellationToken);
 }
+
+/// <summary>A notification as pushed live to its recipient (same shape the list endpoint returns, plus who gets it).</summary>
+public sealed record RealtimeNotification(
+    Guid RecipientUserId, Guid Id, Domain.Notifications.NotificationType Type, string Title, string Message,
+    string? EntityType, Guid? EntityId, DateTimeOffset CreatedAt);
+
+/// <summary>
+/// Live delivery of notifications that are ALREADY committed (SignalR in the API, a no-op elsewhere). Best effort: a
+/// failed or missed push loses nothing, because the bell's list and unread count are read from the database.
+/// </summary>
+public interface IRealtimeNotifier
+{
+    Task PushAsync(IReadOnlyList<RealtimeNotification> notifications, CancellationToken cancellationToken);
+}

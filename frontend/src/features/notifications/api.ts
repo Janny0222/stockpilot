@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api/client'
 import type { NotificationDto, NotificationPreferenceDto, NotificationType, PagedResult } from '@/lib/api/types'
 import { useAuthStore } from '@/stores/auth-store'
+import { useLiveStatus } from './live-status'
 
 export type NotificationParams = { page?: number; pageSize?: number; unreadOnly?: boolean }
 
@@ -15,17 +16,17 @@ export const notificationKeys = {
 /** How often the bell asks "anything new?". Only while the tab is visible (TanStack pauses intervals in the background). */
 export const UNREAD_POLL_MS = 60_000
 
-/**
- * Polling, not a live connection, for now: one indexed COUNT per minute per open tab is cheap, works through every
- * proxy, and survives the free-tier server sleeping. Live push (SignalR) arrives in M11 and will simply refresh this.
- */
+/** The unread count behind the bell: refreshed by live pushes, with polling as the fallback. */
 export function useUnreadCount() {
   const hasTenant = useAuthStore((s) => !!s.user?.tenant)
+  const live = useLiveStatus((s) => s.connected)
   return useQuery({
     queryKey: notificationKeys.unread,
     queryFn: ({ signal }) => api.get<{ count: number }>('/notifications/unread-count', { signal }).then((r) => r.data.count),
     enabled: hasTenant,
-    refetchInterval: UNREAD_POLL_MS,
+    // Live channel up → pushes refresh the count, no need to ask. Down (sleeping server, proxy without WebSockets,
+    // offline) → poll every minute, so the bell is never more than a minute stale.
+    refetchInterval: live ? false : UNREAD_POLL_MS,
   })
 }
 

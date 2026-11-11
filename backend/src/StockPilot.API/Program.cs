@@ -61,6 +61,11 @@ try
     app.UseAuthorization();
 
     app.MapControllers();
+    // Under /api so the Cloudflare Pages proxy and the Vite dev proxy forward it like any API call. When the access
+    // token expires the server closes the connection; the client reconnects with a fresh one, so a deactivated user's
+    // socket can't outlive their session by more than one token lifetime.
+    app.MapHub<StockPilot.API.Realtime.NotificationsHub>(
+        StockPilot.API.Realtime.NotificationsHub.Path, o => o.CloseOnAuthenticationExpiration = true);
     app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
     app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = c => c.Tags.Contains("ready") }).AllowAnonymous();
 

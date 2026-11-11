@@ -14,8 +14,9 @@ beforeAll(() => server.listen({ onUnhandledFrame: 'error' }))
 // doesn't weaken any assertion: a broken page still fails, just after 3s instead of 1s.
 configure({ asyncUtilTimeout: 3000 })
 
-// jsdom lacks the pointer-capture and scrolling APIs Radix Select calls when it opens.
+// jsdom lacks the pointer-capture and scrolling APIs Radix Select (and Sonner's swipe-to-dismiss) call.
 Element.prototype.hasPointerCapture ??= () => false
+Element.prototype.setPointerCapture ??= () => {}
 Element.prototype.releasePointerCapture ??= () => {}
 Element.prototype.scrollIntoView ??= () => {}
 
