@@ -28,6 +28,8 @@ const EVENT_LABELS: Record<string, string> = {
   'Auth.PasswordReset': 'Reset their password',
   'Auth.LoggedOutEverywhere': 'Signed out everywhere',
   'Auth.InvitationAccepted': 'Accepted their invitation',
+  'Platform.TenantSuspended': 'Suspended the company',
+  'Platform.TenantActivated': 'Reactivated the company',
 }
 
 const ENTITY_LABELS: Record<string, string> = { Tenant: 'company settings', UserWarehouseAccess: 'warehouse access' }
@@ -41,7 +43,8 @@ const fieldLabel = (field: string) => {
 }
 
 function describe(entry: AuditLogDto) {
-  if (entry.action.startsWith('Auth.')) return EVENT_LABELS[entry.action] ?? words(entry.action.slice(5))
+  // Named events ("Auth.LoginFailed", "Platform.TenantSuspended") read as their own sentence.
+  if (entry.action.includes('.')) return EVENT_LABELS[entry.action] ?? words(entry.action.split('.').pop()!)
   return `${entry.action} ${entityLabel(entry.entityType)}`
 }
 
@@ -203,7 +206,8 @@ function AuditEntry({ entry }: { entry: AuditLogDto }) {
         {formatDateTime(entry.occurredAt)}
       </time>
       <p className="min-w-0 text-sm">
-        <span className="font-semibold">{entry.userName ?? 'System'}</span>{' '}
+        {/* Platform actions are taken by StockPilot staff, who aren't users of this company. */}
+        <span className="font-semibold">{entry.userName ?? (entry.action.startsWith('Platform.') ? 'StockPilot support' : 'System')}</span>{' '}
         <span className={failed ? 'font-medium text-destructive' : undefined}>{describe(entry).replace(/^./, (c) => c.toLowerCase())}</span>
         {entry.changes.length > 0 && (
           <span className="text-muted-foreground">

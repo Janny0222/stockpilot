@@ -1806,6 +1806,201 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PlatformMetricsDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    Status?: components["schemas"]["TenantStatus"];
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfTenantSummaryDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SuspendTenantCommand"];
+                    "text/json": components["schemas"]["SuspendTenantCommand"];
+                    "application/*+json": components["schemas"]["SuspendTenantCommand"];
+                };
+            };
+            responses: {
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/tenants/{id}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/suppliers": {
         parameters: {
             query?: never;
@@ -3956,6 +4151,18 @@ export interface components {
             totalPages?: number;
         };
         /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfTenantSummaryDto: {
+            items: components["schemas"]["TenantSummaryDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfTransferListItemDto: {
             items: components["schemas"]["TransferListItemDto"][];
             /** Format: int32 */
@@ -3995,6 +4202,20 @@ export interface components {
             code: string;
             group: string;
             description: string;
+        };
+        PlatformMetricsDto: {
+            /** Format: int32 */
+            companies: number;
+            /** Format: int32 */
+            activeCompanies: number;
+            /** Format: int32 */
+            suspendedCompanies: number;
+            /** Format: int32 */
+            newCompaniesLast30Days: number;
+            /** Format: int32 */
+            users: number;
+            /** Format: int32 */
+            usersActiveLast7Days: number;
         };
         ProblemDetails: {
             type?: null | string;
@@ -4565,6 +4786,41 @@ export interface components {
             openOrders: number;
             /** Format: double */
             totalPurchased: null | number;
+        };
+        SuspendTenantCommand: {
+            reason: string;
+        };
+        /** @enum {unknown} */
+        TenantStatus: "Active" | "Suspended";
+        /**
+         * @description Platform administration (Super Admin). Assumption A11: the platform sees companies as ACCOUNTS (name, status, who
+         *     owns it, how big it is, when it was last used), never their business data: no products, prices, stock or orders.
+         *     Counts are the only thing taken from inside a company.
+         *
+         *     The Super Admin has no tenant, so every tenant query filter would match nothing. This folder is one of the few the
+         *     architecture test allows to bypass them (IgnoreQueryFilters), and the endpoints are guarded by platform.* permissions
+         *     that no company role has.
+         */
+        TenantSummaryDto: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            slug: string;
+            status: components["schemas"]["TenantStatus"];
+            currency: string;
+            timeZone: string;
+            /** Format: date-time */
+            createdAt: string;
+            ownerName: null | string;
+            ownerEmail: null | string;
+            /** Format: int32 */
+            activeUsers: number;
+            /** Format: int32 */
+            warehouses: number;
+            /** Format: int32 */
+            products: number;
+            /** Format: date-time */
+            lastActivityAt: null | string;
         };
         TokenRequest: {
             token: string;

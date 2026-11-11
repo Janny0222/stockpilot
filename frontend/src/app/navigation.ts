@@ -38,11 +38,11 @@ export const tenantNav: NavItem[] = [
 ]
 
 export const platformNav: NavItem[] = [
-  { to: '/platform', label: 'Companies', icon: Building, permission: P.Platform.TenantsView, available: false },
+  { to: '/platform', label: 'Companies', icon: Building, permission: P.Platform.TenantsView, available: true },
 ]
 
 /** Settings is visible to everyone: every user can manage their own account and sessions. */
-export const settingsNav: NavItem = { to: '/settings',label: 'Settings', icon: Settings, permission: '', available: true }
+export const settingsNav: NavItem = { to: '/settings', label: 'Settings', icon: Settings, permission: '', available: true }
 
 export const platformIcon = ShieldCheck
 

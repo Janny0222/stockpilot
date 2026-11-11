@@ -9,6 +9,7 @@ import { InventoryPage } from '@/features/inventory/pages/inventory-page'
 import { StockEntryPage } from '@/features/inventory/pages/stock-entry-page'
 import { NewTransferPage, TransferDetailPage } from '@/features/inventory/pages/transfer-pages'
 import { NotificationPreferencesPage, NotificationsPage } from '@/features/notifications/notification-pages'
+import { CompaniesPage, CompanyDetailPage } from '@/features/platform/platform-pages'
 import { CategoriesPage } from '@/features/products/pages/categories-page'
 import { PurchaseOrderDetailPage } from '@/features/purchasing/pages/purchase-order-detail-page'
 import { PurchaseOrderFormPage } from '@/features/purchasing/pages/purchase-order-form-page'
@@ -30,7 +31,7 @@ import { WarehouseDetailPage } from '@/features/warehouses/pages/warehouse-detai
 import { WarehousesPage } from '@/features/warehouses/pages/warehouses-page'
 import { Permissions as P } from '@/lib/permissions'
 import { useAuthStore } from '@/stores/auth-store'
-import { ComingSoonPage, NotFoundPage } from './coming-soon-page'
+import { NotFoundPage } from './coming-soon-page'
 import { RequireAuth, RequireGuest, RequirePermission } from './guards'
 import { AppShell, type RouteHandle } from './layout/app-shell'
 
@@ -43,16 +44,6 @@ function Home() {
   if (permissions.includes(P.Platform.TenantsView)) return <Navigate to="/platform" replace />
   return <Navigate to="/settings/account" replace />
 }
-
-const soon = (path: string, title: string, permission: string, description: string) => ({
-  path,
-  handle: crumb(title),
-  element: (
-    <RequirePermission permission={permission}>
-      <ComingSoonPage title={title} description={description} />
-    </RequirePermission>
-  ),
-})
 
 export const router = createBrowserRouter([
   // Public pages for signed-out visitors.
@@ -174,7 +165,14 @@ export const router = createBrowserRouter([
               { path: ':key', handle: crumb('Report'), element: <RequirePermission permission={P.Reports.View}><ReportPage /></RequirePermission> },
             ],
           },
-          soon('platform', 'Companies', P.Platform.TenantsView, 'Registered companies, with suspend and activate controls.'),
+          {
+            path: 'platform',
+            handle: crumb('Companies'),
+            children: [
+              { index: true, element: <RequirePermission permission={P.Platform.TenantsView}><CompaniesPage /></RequirePermission> },
+              { path: ':id', handle: crumb('Company'), element: <RequirePermission permission={P.Platform.TenantsView}><CompanyDetailPage /></RequirePermission> },
+            ],
+          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },
