@@ -1,4 +1,4 @@
-import { Building2, History, UserRound, Users, type LucideIcon } from 'lucide-react'
+import { Bell, Building2, History,UserRound, Users, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
 import { Permissions as P } from '@/lib/permissions'
 import { cn } from '@/lib/utils'
@@ -8,6 +8,7 @@ type SettingsTab = { to: string; label: string; icon: LucideIcon; permission?: s
 
 const tabs: SettingsTab[] = [
   { to: '/settings/account', label: 'Your account', icon: UserRound },
+  { to: '/settings/notifications', label: 'Notifications', icon: Bell },
   { to: '/settings/company', label: 'Company', icon: Building2, permission: P.Company.Manage },
   { to: '/settings/users', label: 'Users', icon: Users, permission: P.Users.Manage },
   { to: '/settings/audit-log', label: 'Audit log', icon: History, permission: P.Audit.View },

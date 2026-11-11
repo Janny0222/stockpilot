@@ -35,6 +35,8 @@ internal sealed class AuditingInterceptor(ICurrentUser currentUser, TimeProvider
     [
         typeof(AuditLog), typeof(RefreshToken), typeof(UserToken), typeof(Domain.Catalog.StoredFile),
         typeof(Domain.Inventory.InventoryTransaction), typeof(Domain.Inventory.WarehouseStock), typeof(IdempotencyRecord),
+        // Notifications are messages about changes that are already audited; logging them (and every "read") is noise.
+        typeof(Domain.Notifications.Notification), typeof(Domain.Notifications.NotificationPreference),
     ];
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)

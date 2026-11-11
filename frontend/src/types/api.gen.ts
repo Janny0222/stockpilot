@@ -1587,6 +1587,225 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    UnreadOnly?: boolean;
+                    Page?: number;
+                    PageSize?: number;
+                    Search?: string;
+                    Sort?: string;
+                    SafePage?: number;
+                    SafePageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfNotificationDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UnreadCountDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MarkAllReadResult"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NotificationPreferenceDto"][];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateNotificationPreferencesCommand"];
+                    "text/json": components["schemas"]["UpdateNotificationPreferencesCommand"];
+                    "application/*+json": components["schemas"]["UpdateNotificationPreferencesCommand"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["NotificationPreferenceDto"][];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/suppliers": {
         parameters: {
             query?: never;
@@ -3527,6 +3746,10 @@ export interface components {
             email: string;
             password: string;
         };
+        MarkAllReadResult: {
+            /** Format: int32 */
+            marked: number;
+        };
         /**
          * @description Everything the SPA needs after sign-in. IReadOnlyList&lt;string&gt; MeResponse.Permissions drives navigation and button
          *     visibility in the UI, purely as UX. Every endpoint re-checks permissions server-side.
@@ -3595,6 +3818,35 @@ export interface components {
             /** Format: double */
             quantityAfter: number;
         };
+        NotificationDto: {
+            /** Format: uuid */
+            id: string;
+            type: components["schemas"]["NotificationType"];
+            title: string;
+            message: string;
+            entityType: null | string;
+            /** Format: uuid */
+            entityId: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            readAt: null | string;
+        };
+        NotificationPreferenceDto: {
+            type: components["schemas"]["NotificationType"];
+            label: string;
+            description: string;
+            inApp: boolean;
+        };
+        NotificationPreferenceInput: {
+            type: components["schemas"]["NotificationType"];
+            inApp: boolean;
+        };
+        /**
+         * @description What happened. Stored as text, so add new values freely; never rename one.
+         * @enum {unknown}
+         */
+        NotificationType: "LowStock" | "PurchaseOrderAwaitingApproval" | "PurchaseOrderApproved" | "SalesOrderReadyToShip" | "UserJoined";
         /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfAuditLogDto: {
             items: components["schemas"]["AuditLogDto"][];
@@ -3622,6 +3874,18 @@ export interface components {
         /** @description Standard list envelope returned by every paged endpoint. */
         PagedResultOfMovementDto: {
             items: components["schemas"]["MovementDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
+        };
+        /** @description Standard list envelope returned by every paged endpoint. */
+        PagedResultOfNotificationDto: {
+            items: components["schemas"]["NotificationDto"][];
             /** Format: int32 */
             page: number;
             /** Format: int32 */
@@ -4377,11 +4641,18 @@ export interface components {
             lines: components["schemas"]["TransferLine"][];
             note: null | string;
         };
+        UnreadCountDto: {
+            /** Format: int32 */
+            count: number;
+        };
         UpdateCompanySettingsCommand: {
             name: string;
             currency: string;
             timeZone: string;
             allowNegativeStock: boolean;
+        };
+        UpdateNotificationPreferencesCommand: {
+            preferences: components["schemas"]["NotificationPreferenceInput"][];
         };
         UpdateProductCommand: {
             name: string;

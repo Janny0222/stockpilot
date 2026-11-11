@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, Outlet, useMatches } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
+import { NotificationBell } from '@/features/notifications/notification-bell'
 import { useAuthStore } from '@/stores/auth-store'
 import { Sidebar } from './sidebar'
 
@@ -42,6 +43,7 @@ export function AppShell() {
             <Menu />
           </Button>
           <Breadcrumbs />
+          <NotificationBell />
           <CompanyBadge />
         </header>
 

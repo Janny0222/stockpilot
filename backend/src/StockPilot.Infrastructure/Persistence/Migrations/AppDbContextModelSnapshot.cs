@@ -1657,6 +1657,95 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("StockPilot.Domain.Notifications.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("EntityType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("entity_type");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("message");
+
+                    b.Property<DateTimeOffset?>("ReadAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_at");
+
+                    b.Property<Guid>("RecipientUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("recipient_user_id");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notifications");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_notifications_tenant_id");
+
+                    b.HasIndex("RecipientUserId", "ReadAt", "CreatedAt")
+                        .HasDatabaseName("ix_notifications_recipient_user_id_read_at_created_at");
+
+                    b.ToTable("notifications", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Notifications.NotificationPreference", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("type");
+
+                    b.Property<bool>("InApp")
+                        .HasColumnType("boolean")
+                        .HasColumnName("in_app");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("UserId", "Type")
+                        .HasName("pk_notification_preferences");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_notification_preferences_tenant_id");
+
+                    b.ToTable("notification_preferences", (string)null);
+                });
+
             modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2855,6 +2944,33 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_warehouse_stocks_warehouses_warehouse_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Notifications.Notification", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("RecipientUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_users_recipient_user_id");
+
+                    b.HasOne("StockPilot.Domain.Tenancy.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_tenants_tenant_id");
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Notifications.NotificationPreference", b =>
+                {
+                    b.HasOne("StockPilot.Domain.Identity.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notification_preferences_users_user_id");
                 });
 
             modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrder", b =>

@@ -40,3 +40,18 @@ export const formatDateTime = (iso: string | null | undefined) => (iso ? dateTim
 
 /** The calendar day of an instant, in the viewer's local time. */
 export const formatDay = (iso: string | null | undefined) => (iso ? dateFormatter.format(new Date(iso)) : '—')
+
+const relative = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+
+/** "just now", "5 minutes ago", "yesterday", then a plain date after a week. */
+export function timeAgo(iso: string, now = Date.now()) {
+  const seconds = Math.round((new Date(iso).getTime() - now) / 1000)
+  if (Math.abs(seconds) < 45) return 'just now'
+  const minutes = Math.round(seconds / 60)
+  if (Math.abs(minutes) < 60) return relative.format(minutes, 'minute')
+  const hours = Math.round(minutes / 60)
+  if (Math.abs(hours) < 24) return relative.format(hours, 'hour')
+  const days = Math.round(hours / 24)
+  if (Math.abs(days) < 7) return relative.format(days, 'day')
+  return formatDay(iso)
+}

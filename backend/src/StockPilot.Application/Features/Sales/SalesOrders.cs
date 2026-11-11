@@ -296,7 +296,9 @@ public sealed class UpdateSalesOrderHandler(IAppDbContext db, IValidator<SaveSal
 /// reserved and the order stays a draft. Two orders racing for the last units queue on the row lock; the second
 /// sees the first one's reservation and fails cleanly with INSUFFICIENT_STOCK.
 /// </summary>
-public sealed class ConfirmSalesOrderHandler(IAppDbContext db, StockOperations ops, ICurrentUser currentUser, TimeProvider clock)
+public sealed class ConfirmSalesOrderHandler(
+    IAppDbContext db, StockOperations ops, ICurrentUser currentUser, TimeProvider clock,
+    Notifications.LowStockAlerts alerts, Notifications.NotificationPublisher notifications)
 {
     public async Task Handle(Guid id, CancellationToken ct)
     {
@@ -316,6 +318,23 @@ public sealed class ConfirmSalesOrderHandler(IAppDbContext db, StockOperations o
             {
                 stocks[(order.WarehouseId, variantId)].Reserve(quantity, allowNegative, skus[variantId]);
             }
+
+            // Reserving lowers "available", so it can tip items into low stock. And the warehouse can start packing.
+            await alerts.CheckAsync(stocks.Values, tx);
+            var info = await db.SalesOrders.Where(o => o.Id == order.Id)
+                .Select(o => new
+                {
+                    Customer = db.Customers.Where(c => c.Id == o.CustomerId).Select(c => c.Name).Single(),
+                    Warehouse = db.Warehouses.Where(w => w.Id == o.WarehouseId).Select(w => w.Name).Single(),
+                    By = db.Users.Where(u => u.Id == currentUser.UserId).Select(u => u.FirstName + " " + u.LastName).SingleOrDefault(),
+                })
+                .SingleAsync(tx);
+            await notifications.ToAudienceAsync(
+                Domain.Notifications.NotificationType.SalesOrderReadyToShip, order.WarehouseId,
+                new($"{order.Number} is ready to ship",
+                    $"{info.Customer}: {order.Items.Count} {(order.Items.Count == 1 ? "line" : "lines")} from {info.Warehouse}. Confirmed by {info.By ?? "a teammate"}.",
+                    "SalesOrder", order.Id),
+                includeActor: false, tx);
 
             await db.SaveChangesAsync(tx); // a concurrent confirm of the SAME order → version conflict → 409
             return true;

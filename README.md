@@ -8,7 +8,8 @@ ASP.NET Core 10 · Clean Architecture · EF Core + PostgreSQL · JWT with refres
 > overselling), idempotent writes, purchase orders with partial receiving, sales orders that reserve stock on
 > confirm and ship it out with cost of goods and margin, a **dashboard with charts and 5 reports (CSV export)**
 > built only from real data, and **Settings**: invite users by email, scope them to warehouses, deactivate them,
-> company settings and an audit log viewer.
+> company settings and an audit log viewer, plus **in-app notifications** (low stock, approvals, orders to ship) with
+> per-user preferences.
 > Phase 3 (frontend foundation) complete. Backend: authentication, tenant isolation, roles and
 > permissions, auditing, logging and API docs (102 tests). Frontend: design system, responsive app shell, every auth
 > flow, role-based navigation, and the Warehouses and Account pages on the real API (26 tests).

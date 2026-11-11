@@ -8,6 +8,7 @@ import { DashboardPage } from '@/features/dashboard/dashboard-page'
 import { InventoryPage } from '@/features/inventory/pages/inventory-page'
 import { StockEntryPage } from '@/features/inventory/pages/stock-entry-page'
 import { NewTransferPage, TransferDetailPage } from '@/features/inventory/pages/transfer-pages'
+import { NotificationPreferencesPage, NotificationsPage } from '@/features/notifications/notification-pages'
 import { CategoriesPage } from '@/features/products/pages/categories-page'
 import { PurchaseOrderDetailPage } from '@/features/purchasing/pages/purchase-order-detail-page'
 import { PurchaseOrderFormPage } from '@/features/purchasing/pages/purchase-order-form-page'
@@ -144,6 +145,7 @@ export const router = createBrowserRouter([
               { path: ':id', handle: crumb('Customer'), element: <RequirePermission permission={P.Customers.View}><CustomerDetailPage /></RequirePermission> },
             ],
           },
+          { path: 'notifications', handle: crumb('Notifications'), element: <NotificationsPage /> },
           {
             path: 'settings',
             handle: crumb('Settings'),
@@ -151,6 +153,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="/settings/account" replace /> },
               { path: 'account', handle: crumb('Your account'), element: <AccountPage /> },
+              { path: 'notifications', handle: crumb('Notifications'), element: <NotificationPreferencesPage /> },
               { path: 'company', handle: crumb('Company'), element: <RequirePermission permission={P.Company.Manage}><CompanySettingsPage /></RequirePermission> },
               {
                 path: 'users',

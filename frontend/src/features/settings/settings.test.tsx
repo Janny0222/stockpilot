@@ -64,9 +64,14 @@ beforeEach(() => {
 
 describe('Settings navigation', () => {
   it('shows company-wide sections only to roles that can open them', () => {
+    // Everyone has their account and notification preferences.
     as('dashboard.view')
     const { unmount } = renderRoute(<SettingsLayout />, { path: '/settings/account' })
-    expect(screen.queryByRole('navigation', { name: 'Settings sections' })).not.toBeInTheDocument()
+    expect(
+      within(screen.getByRole('navigation', { name: 'Settings sections' }))
+        .getAllByRole('link')
+        .map((l) => l.textContent),
+    ).toEqual(['Your account', 'Notifications'])
     unmount()
 
     as('users.manage', 'company.manage', 'audit.view')
@@ -76,7 +81,7 @@ describe('Settings navigation', () => {
       within(nav)
         .getAllByRole('link')
         .map((l) => l.textContent),
-    ).toEqual(['Your account', 'Company', 'Users', 'Audit log'])
+    ).toEqual(['Your account', 'Notifications', 'Company', 'Users', 'Audit log'])
   })
 })
 

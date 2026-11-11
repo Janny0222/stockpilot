@@ -272,7 +272,8 @@ public enum PurchaseTransition
     Approve,
 }
 
-public sealed class TransitionPurchaseOrderHandler(IAppDbContext db, ICurrentUser currentUser, TimeProvider clock)
+public sealed class TransitionPurchaseOrderHandler(
+    IAppDbContext db, ICurrentUser currentUser, TimeProvider clock, Notifications.NotificationPublisher notifications)
 {
     public async Task Handle(Guid id, PurchaseTransition transition, CancellationToken ct)
     {
@@ -286,6 +287,38 @@ public sealed class TransitionPurchaseOrderHandler(IAppDbContext db, ICurrentUse
         else
         {
             po.Approve(currentUser.UserId, now);
+        }
+
+        var info = await (
+            from s in db.Suppliers
+            where s.Id == po.SupplierId
+            select new
+            {
+                Supplier = s.Name,
+                Warehouse = db.Warehouses.Where(w => w.Id == po.WarehouseId).Select(w => w.Name).Single(),
+                Currency = db.Tenants.Where(t => t.Id == po.TenantId).Select(t => t.Currency).Single(),
+                By = db.Users.Where(u => u.Id == currentUser.UserId).Select(u => u.FirstName + " " + u.LastName).SingleOrDefault(),
+            }).SingleAsync(ct);
+        var by = info.By ?? "a teammate";
+
+        // Saved together with the status change: the notification exists exactly when the transition does.
+        if (transition == PurchaseTransition.Submit)
+        {
+            await notifications.ToAudienceAsync(
+                Domain.Notifications.NotificationType.PurchaseOrderAwaitingApproval, warehouseId: null,
+                new($"{po.Number} needs your approval",
+                    $"{info.Supplier}, {info.Currency} {po.Total:N2}, for {info.Warehouse}. Submitted by {by}.",
+                    "PurchaseOrder", po.Id),
+                includeActor: false, ct);
+        }
+        else
+        {
+            var expected = po.ExpectedDate is { } date ? $" Expected {date:MMM d}." : string.Empty;
+            await notifications.ToAudienceAsync(
+                Domain.Notifications.NotificationType.PurchaseOrderApproved, po.WarehouseId,
+                new($"{po.Number} approved: delivery coming to {info.Warehouse}",
+                    $"From {info.Supplier}.{expected} Approved by {by}.", "PurchaseOrder", po.Id),
+                includeActor: false, ct);
         }
 
         await db.SaveChangesAsync(ct);

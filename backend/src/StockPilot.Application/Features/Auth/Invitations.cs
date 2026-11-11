@@ -5,7 +5,9 @@ using StockPilot.Application.Common.Auditing;
 using StockPilot.Application.Common.Validation;
 using StockPilot.Application.Features.Auth.Common;
 using StockPilot.Domain.Common;
+using StockPilot.Application.Features.Notifications;
 using StockPilot.Domain.Identity;
+using StockPilot.Domain.Notifications;
 using StockPilot.Domain.Tenancy;
 
 namespace StockPilot.Application.Features.Auth;
@@ -71,7 +73,8 @@ public sealed class AcceptInvitationHandler(
     IPasswordHasher passwordHasher,
     AuthTokenIssuer tokenIssuer,
     ICurrentUser currentUser,
-    TimeProvider clock)
+    TimeProvider clock,
+    NotificationPublisher notifications)
 {
     public async Task<AuthResult> Handle(AcceptInvitationCommand command, CancellationToken ct)
     {
@@ -86,8 +89,33 @@ public sealed class AcceptInvitationHandler(
         user.RecordSuccessfulLogin(now);
 
         var (result, _) = tokenIssuer.Issue(user, familyId: Guid.CreateVersion7(), currentUser.IpAddress, currentUser.UserAgent);
-        db.Record(currentUser, clock, AuditEvents.InvitationAccepted,user.TenantId, user.Id);
+        db.Record(currentUser, clock, AuditEvents.InvitationAccepted, user.TenantId, user.Id);
+        await NotifyTeamAsync(user, ct);
         await db.SaveChangesAsync(ct);
         return result;
+    }
+
+    /// <summary>
+    /// Tells the people who manage users that the invitee is in. This request is anonymous (no tenant yet), so the
+    /// tenant filters can't scope the query: it bypasses them and names the invitee's company explicitly instead.
+    /// </summary>
+    private async Task NotifyTeamAsync(User user, CancellationToken ct)
+    {
+        var tenantId = user.TenantId!.Value;
+        const NotificationType type = NotificationType.UserJoined;
+        var permission = NotificationCatalog.Get(type).Permission;
+
+        var recipients = await db.Users.IgnoreQueryFilters()
+            .Where(u => u.TenantId == tenantId && u.Id != user.Id && u.IsActive && u.PasswordHash != null)
+            .Where(u => db.RolePermissions.Any(rp => rp.RoleId == u.RoleId && rp.PermissionCode == permission))
+            .Where(u => !db.NotificationPreferences.IgnoreQueryFilters()
+                .Any(p => p.TenantId == tenantId && p.UserId == u.Id && p.Type == type && !p.InApp))
+            .Select(u => u.Id)
+            .ToListAsync(ct);
+
+        notifications.Add(tenantId, type, recipients, new NotificationContent(
+            $"{user.FullName} joined",
+            $"{user.FirstName} accepted the invitation and signed in as {user.Role.Name}.",
+            "User", user.Id));
     }
 }

@@ -1,0 +1,71 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api/client'
+import type { NotificationDto, NotificationPreferenceDto, NotificationType, PagedResult } from '@/lib/api/types'
+import { useAuthStore } from '@/stores/auth-store'
+
+export type NotificationParams = { page?: number; pageSize?: number; unreadOnly?: boolean }
+
+export const notificationKeys = {
+  all: ['notifications'] as const,
+  unread: ['notifications', 'unread-count'] as const,
+  list: (p: NotificationParams) => ['notifications', 'list', p] as const,
+  preferences: ['notifications', 'preferences'] as const,
+}
+
+/** How often the bell asks "anything new?". Only while the tab is visible (TanStack pauses intervals in the background). */
+export const UNREAD_POLL_MS = 60_000
+
+/**
+ * Polling, not a live connection, for now: one indexed COUNT per minute per open tab is cheap, works through every
+ * proxy, and survives the free-tier server sleeping. Live push (SignalR) arrives in M11 and will simply refresh this.
+ */
+export function useUnreadCount() {
+  const hasTenant = useAuthStore((s) => !!s.user?.tenant)
+  return useQuery({
+    queryKey: notificationKeys.unread,
+    queryFn: ({ signal }) => api.get<{ count: number }>('/notifications/unread-count', { signal }).then((r) => r.data.count),
+    enabled: hasTenant,
+    refetchInterval: UNREAD_POLL_MS,
+  })
+}
+
+export function useNotifications(params: NotificationParams, enabled = true) {
+  return useQuery({
+    queryKey: notificationKeys.list(params),
+    queryFn: ({ signal }) => api.get<PagedResult<NotificationDto>>('/notifications', { params, signal }).then((r) => r.data),
+    placeholderData: (previous) => previous,
+    enabled,
+  })
+}
+
+export function useMarkRead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.post(`/notifications/${id}/read`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationKeys.all }),
+  })
+}
+
+export function useMarkAllRead() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<{ marked: number }>('/notifications/read-all').then((r) => r.data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: notificationKeys.all }),
+  })
+}
+
+export function useNotificationPreferences() {
+  return useQuery({
+    queryKey: notificationKeys.preferences,
+    queryFn: ({ signal }) => api.get<NotificationPreferenceDto[]>('/notifications/preferences', { signal }).then((r) => r.data),
+  })
+}
+
+export function useUpdateNotificationPreference() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (pref: { type: NotificationType; inApp: boolean }) =>
+      api.put<NotificationPreferenceDto[]>('/notifications/preferences', { preferences: [pref] }).then((r) => r.data),
+    onSuccess: (data) => queryClient.setQueryData(notificationKeys.preferences, data),
+  })
+}

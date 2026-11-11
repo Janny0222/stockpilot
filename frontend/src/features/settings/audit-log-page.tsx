@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import type { AuditLogDto } from '@/lib/api/types'
 import { formatDateTime } from '@/lib/format'
+import { entityPath } from '@/lib/links'
 import { useAuditFilters, useAuditLogs } from './api'
 
 const ALL = 'all'
@@ -37,17 +38,6 @@ const entityLabel = (type: string) => ENTITY_LABELS[type] ?? words(type).toLower
 const fieldLabel = (field: string) => {
   const w = words(field).replace(/ Id$/, '')
   return w.charAt(0) + w.slice(1).toLowerCase()
-}
-
-const ENTITY_LINKS: Record<string, string> = {
-  User: '/settings/users/',
-  Product: '/products/',
-  PurchaseOrder: '/purchases/',
-  SalesOrder: '/sales/',
-  Customer: '/customers/',
-  Supplier: '/suppliers/',
-  Warehouse: '/warehouses/',
-  StockTransfer: '/inventory/transfers/',
 }
 
 function describe(entry: AuditLogDto) {
@@ -205,7 +195,7 @@ function FilterSelect({
 }
 
 function AuditEntry({ entry }: { entry: AuditLogDto }) {
-  const link = entry.entityId && ENTITY_LINKS[entry.entityType] ? `${ENTITY_LINKS[entry.entityType]}${entry.entityId}` : null
+  const link = entityPath(entry.entityType, entry.entityId)
   const failed = entry.action === 'Auth.LoginFailed' || entry.action === 'Auth.RefreshTokenReuseDetected'
   const summary = (
     <div className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-4">

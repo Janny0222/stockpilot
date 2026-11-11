@@ -9,6 +9,7 @@ using StockPilot.Domain.Catalog;
 using StockPilot.Domain.Common;
 using StockPilot.Domain.Identity;
 using StockPilot.Domain.Inventory;
+using StockPilot.Domain.Notifications;
 using StockPilot.Domain.Purchasing;
 using StockPilot.Domain.Sales;
 using StockPilot.Domain.Tenancy;
@@ -54,6 +55,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options, ICurren
     public DbSet<SalesOrderItem> SalesOrderItems => Set<SalesOrderItem>();
     public DbSet<SalesShipment> SalesShipments => Set<SalesShipment>();
     public DbSet<SalesShipmentItem> SalesShipmentItems => Set<SalesShipmentItem>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
     public Task<T> ExecuteInTransactionAsync<T>(Func<CancellationToken, Task<T>> work, CancellationToken cancellationToken)

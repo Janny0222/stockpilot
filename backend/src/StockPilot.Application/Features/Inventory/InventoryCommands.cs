@@ -193,7 +193,7 @@ public sealed class StockInHandler(IAppDbContext db, IValidator<RecordStockComma
     }
 }
 
-public sealed class StockOutHandler(IAppDbContext db, IValidator<RecordStockCommand> validator, StockOperations ops)
+public sealed class StockOutHandler(IAppDbContext db, IValidator<RecordStockCommand> validator, StockOperations ops, Notifications.LowStockAlerts alerts)
 {
     public async Task<StockOperationResult> Handle(RecordStockCommand command, CancellationToken ct)
     {
@@ -215,13 +215,14 @@ public sealed class StockOutHandler(IAppDbContext db, IValidator<RecordStockComm
                 entries.Add(ops.Ledger(stock, InventoryMovementType.StockOut, -line.Quantity, stock.AverageUnitCost, correlationId, command.Reference, command.Note));
             }
 
+            await alerts.CheckAsync(stocks.Values, tx);
             await db.SaveChangesAsync(tx);
             return new StockOperationResult(correlationId, null, entries.Select(StockOperations.ToResult).ToList());
         }, ct);
     }
 }
 
-public sealed class AdjustStockHandler(IAppDbContext db, IValidator<AdjustStockCommand> validator, StockOperations ops)
+public sealed class AdjustStockHandler(IAppDbContext db, IValidator<AdjustStockCommand> validator, StockOperations ops, Notifications.LowStockAlerts alerts)
 {
     public async Task<StockOperationResult> Handle(AdjustStockCommand command, CancellationToken ct)
     {
@@ -248,6 +249,7 @@ public sealed class AdjustStockHandler(IAppDbContext db, IValidator<AdjustStockC
             var entry = ops.Ledger(stock, delta > 0 ? InventoryMovementType.AdjustmentIncrease : InventoryMovementType.AdjustmentDecrease,
                 delta, stock.AverageUnitCost, Guid.CreateVersion7(), null, command.Note, command.Reason);
 
+            await alerts.CheckAsync(stocks.Values, tx);
             await db.SaveChangesAsync(tx);
             return new StockOperationResult(entry.CorrelationId, null, [StockOperations.ToResult(entry)]);
         }, ct);
@@ -255,7 +257,8 @@ public sealed class AdjustStockHandler(IAppDbContext db, IValidator<AdjustStockC
 }
 
 public sealed class TransferStockHandler(
-    IAppDbContext db, IValidator<TransferStockCommand> validator, StockOperations ops, IDocumentNumberGenerator numbers, ICurrentUser currentUser, TimeProvider clock)
+    IAppDbContext db, IValidator<TransferStockCommand> validator, StockOperations ops, IDocumentNumberGenerator numbers, ICurrentUser currentUser, TimeProvider clock,
+    Notifications.LowStockAlerts alerts)
 {
     public async Task<StockOperationResult> Handle(TransferStockCommand command, CancellationToken ct)
     {
@@ -292,6 +295,7 @@ public sealed class TransferStockHandler(
             }
 
             db.StockTransfers.Add(transfer);
+            await alerts.CheckAsync(stocks.Values, tx); // only the source side can drop
             await db.SaveChangesAsync(tx);
             return new StockOperationResult(transfer.Id, number, entries.Select(StockOperations.ToResult).ToList());
         }, ct);
