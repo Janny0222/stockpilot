@@ -53,7 +53,7 @@ export function useDownloadReport() {
       const url = URL.createObjectURL(response.data)
       const link = document.createElement('a')
       link.href = url
-      link.download = decodeURIComponent(name)
+      link.download = safeDecode(name) ?? `${key}.csv` // a malformed %-sequence mustn't break the download
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -61,4 +61,12 @@ export function useDownloadReport() {
       return name
     },
   })
+}
+
+function safeDecode(value: string) {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return null
+  }
 }

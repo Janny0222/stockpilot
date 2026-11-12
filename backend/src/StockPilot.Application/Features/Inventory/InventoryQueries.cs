@@ -88,8 +88,9 @@ public sealed class ListStockHandler(IAppDbContext db, WarehouseAccessService ac
         {
             ("available", false) => rows.OrderBy(r => r.s.QuantityOnHand - r.s.QuantityReserved).ThenBy(r => r.p.Name),
             ("available", true) => rows.OrderByDescending(r => r.s.QuantityOnHand - r.s.QuantityReserved).ThenBy(r => r.p.Name),
-            ("value", true) => rows.OrderByDescending(r => r.s.QuantityOnHand * r.s.AverageUnitCost),
-            ("value", false) => rows.OrderBy(r => r.s.QuantityOnHand * r.s.AverageUnitCost),
+            // Sorting by value would reveal the cost ranking even with the value column hidden, so only cost viewers get it.
+            ("value", true) when canViewCost => rows.OrderByDescending(r => r.s.QuantityOnHand * r.s.AverageUnitCost),
+            ("value", false) when canViewCost => rows.OrderBy(r => r.s.QuantityOnHand * r.s.AverageUnitCost),
             ("name", true) => rows.OrderByDescending(r => r.p.Name).ThenBy(r => r.v.Sku),
             _ => rows.OrderBy(r => r.p.Name).ThenBy(r => r.v.Sku).ThenBy(r => r.w.Code),
         };
@@ -265,11 +266,18 @@ public sealed record VariantOptionDto(
     decimal? CostPrice, decimal OnHand, decimal Available, decimal SellingPrice);
 
 /// <summary>Type-ahead for stock forms: active variants matching name/SKU/barcode, with stock in the chosen warehouse.</summary>
-public sealed class SearchStockVariantsHandler(IAppDbContext db, PermissionChecker permissions)
+public sealed class SearchStockVariantsHandler(IAppDbContext db, PermissionChecker permissions, WarehouseAccessService access)
 {
     public async Task<IReadOnlyList<VariantOptionDto>> Handle(string? search, Guid? warehouseId, CancellationToken ct)
     {
         var canViewCost = await permissions.HasAsync(Permissions.Inventory.ViewCost, ct);
+
+        // The quantities come from the requested warehouse, so it must be one this user may see. Without this check an
+        // Inventory Staff member could read any warehouse's stock by passing its ID (found in a security review).
+        if (warehouseId is { } requested && await access.GetAccessibleWarehouseIdsAsync(ct) is { } allowed && !allowed.Contains(requested))
+        {
+            throw new NotFoundException("Warehouse", requested);
+        }
 
         var rows =
             from v in db.ProductVariants.AsNoTracking()

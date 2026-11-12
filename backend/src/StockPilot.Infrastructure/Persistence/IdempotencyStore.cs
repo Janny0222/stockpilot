@@ -41,7 +41,9 @@ public sealed class IdempotencyStore(AppDbContext db, TimeProvider clock)
             }
         }
 
-        if (existing.RequestHash != requestHash)
+        // A key belongs to the person who first used it. Someone else in the company replaying it (even with the same
+        // body) must never receive the first person's stored response.
+        if (existing.RequestHash != requestHash || existing.UserId != userId)
         {
             throw new Application.Common.Exceptions.ConflictException(
                 "IDEMPOTENCY_KEY_REUSED", "This Idempotency-Key was already used for a different request.");

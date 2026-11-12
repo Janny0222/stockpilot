@@ -19,8 +19,11 @@ interface Env {
 
 type PagesContext = { request: Request; env: Env }
 
-// Hop-by-hop / identity headers we must not forward as-is.
-const STRIP = ['host', 'cf-connecting-ip', 'x-forwarded-for', 'x-real-ip', 'x-client-ip', 'x-proxy-secret']
+// Hop-by-hop / identity headers we must not forward as-is: a client could otherwise claim another IP, host or scheme.
+const STRIP = [
+  'host', 'cf-connecting-ip', 'x-forwarded-for', 'x-real-ip', 'x-client-ip', 'x-proxy-secret',
+  'forwarded', 'x-forwarded-prefix', 'x-original-host', 'x-original-url', 'x-original-for', 'x-original-proto',
+]
 
 export const onRequest = async ({ request, env }: PagesContext): Promise<Response> => {
   if (!env.API_ORIGIN) {
@@ -29,6 +32,11 @@ export const onRequest = async ({ request, env }: PagesContext): Promise<Respons
 
   const incoming = new URL(request.url)
   const target = new URL(incoming.pathname + incoming.search, env.API_ORIGIN)
+  // URL parsing collapses "../" and "%2e%2e" segments, so "/api/%2e%2e/swagger" would otherwise reach a non-API path
+  // upstream. Only the API's own routes go through this proxy.
+  if (!target.pathname.startsWith('/api/')) {
+    return Response.json({ status: 404, code: 'NOT_FOUND', detail: 'Not found.' }, { status: 404 })
+  }
 
   const headers = new Headers(request.headers)
   for (const name of STRIP) headers.delete(name)

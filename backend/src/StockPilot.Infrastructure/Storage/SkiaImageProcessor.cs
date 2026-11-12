@@ -17,9 +17,21 @@ namespace StockPilot.Infrastructure.Storage;
 internal sealed class SkiaImageProcessor : IImageProcessor
 {
     public const int MaxUploadBytes = 2 * 1024 * 1024;
-    private const int MaxPixels = 40_000_000;
+
+    /// <summary>
+    /// 16 MP (e.g. 4900 × 3265) covers any normal phone or camera photo. A decoded pixel costs 4 bytes, so this caps a
+    /// decode at about 64 MB. The 2 MB file limit alone isn't enough: a flat-colour PNG of 6300 × 6300 compresses to a
+    /// few KB and would decode to 160 MB.
+    /// </summary>
+    private const int MaxPixels = 16_000_000;
     private const int MaxEdge = 1200;
     private const int WebpQuality = 82;
+
+    /// <summary>
+    /// One decode at a time, server-wide. The free instance has 512 MB, so even a few allowed-size uploads at once could
+    /// exhaust it. Uploads are rare and take well under a second, so queueing them costs nothing noticeable.
+    /// </summary>
+    private static readonly SemaphoreSlim DecodeGate = new(1, 1);
 
     public async Task<ProcessedImage> ProcessAsync(Stream input, CancellationToken cancellationToken)
     {
@@ -33,13 +45,29 @@ internal sealed class SkiaImageProcessor : IImageProcessor
         using var data = SKData.CreateCopy(bytes);
         using var codec = SKCodec.Create(data) ?? throw Invalid();
 
+        // Checked from the header, BEFORE any pixel memory is allocated.
         if ((long)codec.Info.Width * codec.Info.Height > MaxPixels)
         {
-            throw new DomainException("IMAGE_TOO_LARGE", "That image's dimensions are too large. Use one under 40 megapixels.");
+            throw new DomainException("IMAGE_TOO_LARGE", "That image's dimensions are too large. Use one under 16 megapixels.");
         }
 
+        await DecodeGate.WaitAsync(cancellationToken);
+        try
+        {
+            return Process(codec);
+        }
+        finally
+        {
+            DecodeGate.Release();
+        }
+    }
+
+    /// <summary>Decode → rotate if needed → shrink if needed → WebP. No full-size copies beyond what each step needs.</summary>
+    private static ProcessedImage Process(SKCodec codec)
+    {
         using var decoded = SKBitmap.Decode(codec) ?? throw Invalid();
-        using var upright = ApplyOrientation(decoded, codec.EncodedOrigin);
+        using var rotated = ApplyOrientation(decoded, codec.EncodedOrigin); // null when already upright
+        var upright = rotated ?? decoded;
 
         var scale = Math.Min(1d, (double)MaxEdge / Math.Max(upright.Width, upright.Height));
         var width = Math.Max(1, (int)Math.Round(upright.Width * scale));
@@ -47,8 +75,8 @@ internal sealed class SkiaImageProcessor : IImageProcessor
 
         using var resized = scale < 1
             ? upright.Resize(new SKImageInfo(width, height), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear))
-            : upright.Copy();
-        using var image = SKImage.FromBitmap(resized);
+            : null;
+        using var image = SKImage.FromBitmap(resized ?? upright);
         using var encoded = image.Encode(SKEncodedImageFormat.Webp, WebpQuality) ?? throw Invalid();
 
         return new ProcessedImage(encoded.ToArray(), "image/webp", width, height);
@@ -77,12 +105,15 @@ internal sealed class SkiaImageProcessor : IImageProcessor
         b.StartsWith((ReadOnlySpan<byte>)[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) ||    // PNG
         (b.Length >= 12 && b[..4].SequenceEqual("RIFF"u8) && b[8..12].SequenceEqual("WEBP"u8)); // WebP
 
-    /// <summary>Phone photos are often stored sideways with an EXIF "rotate me" flag; bake the rotation in.</summary>
-    private static SKBitmap ApplyOrientation(SKBitmap source, SKEncodedOrigin origin)
+    /// <summary>
+    /// Phone photos are often stored sideways with an EXIF "rotate me" flag; bake the rotation in. Returns null when the
+    /// image is already upright (or mirrored, which is rare), so the caller uses the decoded bitmap as is, no copy.
+    /// </summary>
+    private static SKBitmap? ApplyOrientation(SKBitmap source, SKEncodedOrigin origin)
     {
-        if (origin is SKEncodedOrigin.TopLeft or SKEncodedOrigin.Default)
+        if (origin is not (SKEncodedOrigin.BottomRight or SKEncodedOrigin.RightTop or SKEncodedOrigin.LeftBottom))
         {
-            return source.Copy();
+            return null;
         }
 
         var swap = origin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;

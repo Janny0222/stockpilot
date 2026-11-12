@@ -232,6 +232,22 @@ public sealed class ProductsTests(ApiFactory factory)
         (await owner.Client.GetAsync("/api/v1/products/lookup?code=SW-1")).StatusCode.ShouldBe(HttpStatusCode.NotFound);
     }
 
+    /// <summary>
+    /// A "decompression bomb": a flat-colour 20 MP PNG is only a few KB on disk (well under the 2 MB limit) but would
+    /// decode to ~80 MB. It must be refused from its header, before any pixels are allocated.
+    /// </summary>
+    [Fact]
+    public async Task A_tiny_file_that_decodes_to_a_huge_image_is_refused_before_decoding()
+    {
+        var owner = await factory.RegisterCompanyAsync();
+        var product = await CreateAsync(owner.Client, NewProduct("Bomb"));
+        var bomb = Png(5000, 4000);
+        bomb.Length.ShouldBeLessThan(2 * 1024 * 1024);
+
+        var upload = await owner.Client.PostAsync($"/api/v1/products/{product.Id}/images", ImageForm(bomb, "bomb.png"));
+        (await upload.ReadProblemAsync()).Code.ShouldBe("IMAGE_TOO_LARGE");
+    }
+
     private static MultipartFormDataContent ImageForm(byte[] bytes, string fileName)
     {
         var content = new ByteArrayContent(bytes);

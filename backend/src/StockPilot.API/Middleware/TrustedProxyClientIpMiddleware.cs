@@ -12,30 +12,69 @@ namespace StockPilot.API.Middleware;
 /// The proxy sends the visitor IP in X-Client-IP together with a shared secret. We trust X-Client-IP ONLY
 /// when the secret matches (constant-time compare). Someone calling the Render URL directly can't spoof
 /// their IP, because they don't know the secret.
+///
+/// With ForwardedHeaders:RequireProxySecret=true (production), a request WITHOUT the secret is refused outright,
+/// except health checks. The proxy then is the only way in, so nobody can go around it to the Render URL and pick
+/// their own X-Forwarded-For to dodge the per-IP sign-in limits (found in a security review).
 /// </summary>
-internal sealed class TrustedProxyClientIpMiddleware(RequestDelegate next, IConfiguration configuration)
+internal sealed class TrustedProxyClientIpMiddleware
 {
     public const string SecretHeader = "X-Proxy-Secret";
     public const string ClientIpHeader = "X-Client-IP";
+    public const int MinSecretLength = 32;
 
-    private readonly byte[]? _secret = configuration["ForwardedHeaders:ProxySecret"] is { Length: >= 32 } s
-        ? Encoding.UTF8.GetBytes(s)
-        : null;
+    private readonly RequestDelegate _next;
+    private readonly byte[]? _secret;
+    private readonly bool _required;
 
-    public Task InvokeAsync(HttpContext context)
+    public TrustedProxyClientIpMiddleware(RequestDelegate next, IConfiguration configuration)
+    {
+        _next = next;
+        var configured = configuration["ForwardedHeaders:ProxySecret"];
+        _required = configuration.GetValue<bool>("ForwardedHeaders:RequireProxySecret");
+
+        // A short secret used to be silently ignored, which quietly made every visitor share Cloudflare's IPs (and one
+        // sign-in rate limit). A misconfiguration must stop the app instead.
+        if (!string.IsNullOrEmpty(configured) && configured.Length < MinSecretLength)
+        {
+            throw new InvalidOperationException($"ForwardedHeaders:ProxySecret must be at least {MinSecretLength} characters.");
+        }
+
+        if (_required && string.IsNullOrEmpty(configured))
+        {
+            throw new InvalidOperationException("ForwardedHeaders:RequireProxySecret is on but ForwardedHeaders:ProxySecret is not set.");
+        }
+
+        _secret = string.IsNullOrEmpty(configured) ? null : Encoding.UTF8.GetBytes(configured);
+    }
+
+    public async Task InvokeAsync(HttpContext context)
     {
         var headers = context.Request.Headers;
-
-        if (_secret is not null &&
+        var trusted = _secret is not null &&
             headers.TryGetValue(SecretHeader, out var provided) &&
-            CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(provided.ToString()), _secret) &&
-            IPAddress.TryParse(headers[ClientIpHeader].ToString(), out var clientIp))
+            CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(provided.ToString()), _secret);
+
+        // Never let the secret travel further (logs, downstream code).
+        headers.Remove(SecretHeader);
+
+        if (_required && !trusted && !context.Request.Path.StartsWithSegments("/health"))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                status = 403,
+                code = "DIRECT_ACCESS_BLOCKED",
+                detail = "Use the StockPilot web app.",
+            });
+            return;
+        }
+
+        if (trusted && IPAddress.TryParse(headers[ClientIpHeader].ToString(), out var clientIp))
         {
             context.Connection.RemoteIpAddress = clientIp;
         }
 
-        // Never let the secret travel further (logs, downstream code).
-        headers.Remove(SecretHeader);
-        return next(context);
+        await _next(context);
     }
 }

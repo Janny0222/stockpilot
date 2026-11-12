@@ -54,6 +54,10 @@ describe('safeReturnTo', () => {
     ['/warehouses?q=1', '/warehouses?q=1'],
     ['//evil.example', '/'],
     ['https://evil.example', '/'],
+    // Browsers normalise these into "//evil.example" (found in the security review):
+    ['/\\evil.example', '/'],
+    ['/\t/evil.example', '/'],
+    ['/%09/evil.example', '/%09/evil.example'], // stays encoded: a harmless in-app path, not a host
     [null, '/'],
   ])('%s → %s', (input, expected) => {
     expect(safeReturnTo(input)).toBe(expected)

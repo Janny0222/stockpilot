@@ -164,13 +164,17 @@ public sealed class StockOperations(IAppDbContext db, ICurrentUser currentUser, 
     private static string? Clean(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }
 
-public sealed class StockInHandler(IAppDbContext db, IValidator<RecordStockCommand> validator, StockOperations ops)
+public sealed class StockInHandler(
+    IAppDbContext db, IValidator<RecordStockCommand> validator, StockOperations ops, Common.Security.PermissionChecker permissions)
 {
     public async Task<StockOperationResult> Handle(RecordStockCommand command, CancellationToken ct)
     {
         await validator.ValidateAndThrowAsync(command, ct);
         await ops.EnsureWarehouseUsableAsync(command.WarehouseId, ct);
         var costPrices = await ops.EnsureVariantsUsableAsync(command.Lines.Select(l => l.VariantId).ToList(), ct);
+        // Someone who can't SEE costs mustn't SET them either: a typed unit cost moves the average cost, and with it
+        // stock value and cost of goods sold. Their stock-in uses the catalogue cost price instead.
+        var canSetCost = await permissions.HasAsync(Domain.Identity.Permissions.Inventory.ViewCost, ct);
 
         return await db.ExecuteInTransactionAsync(async tx =>
         {
@@ -180,8 +184,8 @@ public sealed class StockInHandler(IAppDbContext db, IValidator<RecordStockComma
 
             foreach (var line in command.Lines)
             {
-                // No cost entered → use the variant's catalogue cost price.
-                var unitCost = line.UnitCost ?? costPrices[line.VariantId];
+                // No cost entered (or not allowed to enter one) → use the variant's catalogue cost price.
+                var unitCost = (canSetCost ? line.UnitCost : null) ?? costPrices[line.VariantId];
                 var stock = stocks[(command.WarehouseId, line.VariantId)];
                 stock.Receive(line.Quantity, unitCost);
                 entries.Add(ops.Ledger(stock, InventoryMovementType.StockIn, line.Quantity, unitCost, correlationId, command.Reference, command.Note));

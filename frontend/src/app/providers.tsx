@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { toApiError } from '@/lib/api/errors'
+import { useAuthStore } from '@/stores/auth-store'
 
 export function createQueryClient() {
   const client = new QueryClient({
@@ -25,6 +26,14 @@ export function createQueryClient() {
     if (event.type === 'removed' && typeof data === 'string' && data.startsWith('blob:')) {
       URL.revokeObjectURL(data)
     }
+  })
+
+  // Cached data belongs to whoever was signed in. Whenever that person changes (sign-in, sign-out, a session that
+  // expired or was revoked elsewhere, an invitation accepted on a shared computer), drop everything, so the next user
+  // never sees the previous user's lists while their own load. A profile reload for the SAME user (e.g. after renaming
+  // the company) keeps the cache.
+  useAuthStore.subscribe((state, previous) => {
+    if (state.user?.id !== previous.user?.id) client.clear()
   })
 
   return client

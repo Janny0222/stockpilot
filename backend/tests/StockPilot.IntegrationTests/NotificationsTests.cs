@@ -133,7 +133,8 @@ public sealed class NotificationsTests(ApiFactory factory)
 
         (await manager.Client.PostAsync($"/api/v1/purchase-orders/{po}/submit", null)).StatusCode.ShouldBe(HttpStatusCode.NoContent);
         var approve = (await InboxAsync(c.Owner, "PurchaseOrderAwaitingApproval")).ShouldHaveSingleItem();
-        approve.GetProperty("message").GetString()!.ShouldContain("Philips Lighting, PHP 500.00");
+        approve.GetProperty("message").GetString()!.ShouldContain("Philips Lighting, 1 line");
+        approve.GetProperty("message").GetString()!.ShouldNotContain("500"); // amounts are cost data, kept out of the text
         (await InboxAsync(manager, "PurchaseOrderAwaitingApproval")).ShouldBeEmpty(); // they submitted it
         (await InboxAsync(receiver, "PurchaseOrderAwaitingApproval")).ShouldBeEmpty(); // can't approve
 

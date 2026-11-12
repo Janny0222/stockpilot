@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using StockPilot.API.Extensions;
 using StockPilot.API.Authorization;
 using StockPilot.Application.Common.Models;
 using StockPilot.Application.Features.Settings;
@@ -40,6 +42,7 @@ public sealed class UsersController : ControllerBase
     /// <summary>Invites someone by email. They choose their own password from the link.</summary>
     [HttpPost]
     [HasPermission(Permissions.Users.Manage)]
+    [EnableRateLimiting(RateLimitPolicies.Invites)]
     [ProducesResponseType<UserDto>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Invite(InviteUserCommand command, [FromServices] InviteUserHandler handler, CancellationToken ct)
@@ -73,6 +76,7 @@ public sealed class UsersController : ControllerBase
 
     [HttpPost("{id:guid}/resend-invitation")]
     [HasPermission(Permissions.Users.Manage)]
+    [EnableRateLimiting(RateLimitPolicies.Invites)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> ResendInvitation(Guid id, [FromServices] ResendInvitationHandler handler, CancellationToken ct)
     {

@@ -119,8 +119,9 @@ public sealed class ListPurchaseOrdersHandler(IAppDbContext db, WarehouseAccessS
 
         rows = query.ParseSort() switch
         {
-            ("total", true) => rows.OrderByDescending(r => r.p.Total),
-            ("total", false) => rows.OrderBy(r => r.p.Total),
+            // Like the hidden Total column: no sorting by cost for roles that can't see it.
+            ("total", true) when canViewCost => rows.OrderByDescending(r => r.p.Total),
+            ("total", false) when canViewCost => rows.OrderBy(r => r.p.Total),
             ("expected", false) => rows.OrderBy(r => r.p.ExpectedDate),
             ("expected", true) => rows.OrderByDescending(r => r.p.ExpectedDate),
             ("number", false) => rows.OrderBy(r => r.p.Number),
@@ -296,7 +297,6 @@ public sealed class TransitionPurchaseOrderHandler(
             {
                 Supplier = s.Name,
                 Warehouse = db.Warehouses.Where(w => w.Id == po.WarehouseId).Select(w => w.Name).Single(),
-                Currency = db.Tenants.Where(t => t.Id == po.TenantId).Select(t => t.Currency).Single(),
                 By = db.Users.Where(u => u.Id == currentUser.UserId).Select(u => u.FirstName + " " + u.LastName).SingleOrDefault(),
             }).SingleAsync(ct);
         var by = info.By ?? "a teammate";
@@ -307,7 +307,8 @@ public sealed class TransitionPurchaseOrderHandler(
             await notifications.ToAudienceAsync(
                 Domain.Notifications.NotificationType.PurchaseOrderAwaitingApproval, warehouseId: null,
                 new($"{po.Number} needs your approval",
-                    $"{info.Supplier}, {info.Currency} {po.Total:N2}, for {info.Warehouse}. Submitted by {by}.",
+                    // No amount: the audience is everyone who can approve, and amounts are cost data (inventory.view_cost).
+                    $"{info.Supplier}, {po.Items.Count} {(po.Items.Count == 1 ? "line" : "lines")}, for {info.Warehouse}. Submitted by {by}.",
                     "PurchaseOrder", po.Id),
                 includeActor: false, ct);
         }

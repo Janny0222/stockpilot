@@ -49,7 +49,17 @@ export function Forbidden() {
   )
 }
 
-/** Only allow same-site relative paths, so "?returnTo=https://evil.example" can't redirect off-site. */
+/**
+ * Only same-site paths, so "?returnTo=https://evil.example" can't send someone off-site after signing in. Resolved the
+ * way the browser would, so tricks like "/\evil.example" or "/%09/evil.example" (which browsers turn into
+ * "//evil.example") are caught too, not just the obvious "//".
+ */
 export function safeReturnTo(value: string | null) {
-  return value && value.startsWith('/') && !value.startsWith('//') ? value : '/'
+  if (!value || !value.startsWith('/')) return '/'
+  try {
+    const url = new URL(value, window.location.origin)
+    return url.origin === window.location.origin ? url.pathname + url.search + url.hash : '/'
+  } catch {
+    return '/'
+  }
 }

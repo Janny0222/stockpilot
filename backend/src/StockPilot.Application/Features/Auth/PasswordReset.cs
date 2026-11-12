@@ -43,7 +43,10 @@ public sealed class ForgotPasswordHandler(
             user.Id, UserTokenPurpose.PasswordReset, hash, clock.GetUtcNow(), options.Value.PasswordResetTokenLifetime));
         await db.SaveChangesAsync(ct);
 
-        await emails.SendPasswordResetAsync(user, raw, ct);
+        // Not awaited: talking to the mail server takes hundreds of milliseconds, so waiting for it would make the
+        // response for a REAL account measurably slower than for an unknown one, and that timing would reveal which
+        // emails are registered. The send logs its own failures; the user can always ask again.
+        _ = emails.SendPasswordResetAsync(user, raw, CancellationToken.None);
     }
 }
 

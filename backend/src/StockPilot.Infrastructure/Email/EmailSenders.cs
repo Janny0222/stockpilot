@@ -1,5 +1,6 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -55,12 +56,24 @@ internal sealed class SmtpEmailSender(IOptions<EmailOptions> options) : IEmailSe
     }
 }
 
-/// <summary>Development fallback: writes the email (including its link) to the log instead of sending it.</summary>
-internal sealed class LoggingEmailSender(ILogger<LoggingEmailSender> logger) : IEmailSender
+/// <summary>
+/// Fallback when no email provider is set: writes the email to the log instead of sending it. In Development the whole
+/// body is logged (that's how you click verification and invite links locally). Anywhere else only who and what: the
+/// body carries sign-in links (password reset, invitations), and those must never sit in hosted logs.
+/// </summary>
+internal sealed class LoggingEmailSender(ILogger<LoggingEmailSender> logger, IHostEnvironment environment) : IEmailSender
 {
     public Task SendAsync(EmailMessage message, CancellationToken cancellationToken)
     {
-        logger.LogWarning("[DEV EMAIL] To: {To} | Subject: {Subject}\n{Body}", message.To, message.Subject, message.TextBody);
+        if (environment.IsDevelopment())
+        {
+            logger.LogWarning("[DEV EMAIL] To: {To} | Subject: {Subject}\n{Body}", message.To, message.Subject, message.TextBody);
+        }
+        else
+        {
+            logger.LogWarning("Email not sent (Email:Provider=Log): To {To} | Subject {Subject}. Configure SMTP to deliver it.", message.To, message.Subject);
+        }
+
         return Task.CompletedTask;
     }
 }

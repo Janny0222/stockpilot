@@ -22,6 +22,9 @@ namespace StockPilot.API.Extensions;
 public static class RateLimitPolicies
 {
     public const string Auth = "auth";
+
+    /// <summary>Invitation emails, per company: an account mustn't be usable as a free mass-mailer from our domain.</summary>
+    public const string Invites = "invites";
 }
 
 internal static class ApiServiceExtensions
@@ -177,6 +180,14 @@ internal static class ApiServiceExtensions
             o.AddPolicy(RateLimitPolicies.Auth, ctx => RateLimitPartition.GetFixedWindowLimiter(
                 ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = authLimit, Window = TimeSpan.FromMinutes(1) }));
+
+            // Invitations send email from OUR domain with text the company controls (its name). Anyone can register a
+            // company, so without a cap one account could mail thousands of addresses. 30 an hour per company is plenty
+            // for onboarding a real team (found in a security review).
+            var inviteLimit = configuration.GetValue("RateLimiting:InvitesPerHour", 30);
+            o.AddPolicy(RateLimitPolicies.Invites, ctx => RateLimitPartition.GetFixedWindowLimiter(
+                ctx.User.FindFirst(StockPilotClaims.TenantId)?.Value ?? ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = inviteLimit, Window = TimeSpan.FromHours(1) }));
 
             // Everything else: generous, per user when signed in, otherwise per IP.
             o.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>

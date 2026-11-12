@@ -59,6 +59,7 @@ ConnectionStrings__Database=<pooled production connection string>
 Jwt__SigningKey=<openssl rand -base64 48>
 ForwardedHeaders__Enabled=true
 ForwardedHeaders__ProxySecret=<openssl rand -hex 32>
+ForwardedHeaders__RequireProxySecret=true                  # only the Pages proxy may call the API (health checks excepted)
 Auth__RequireConfirmedEmail=false
 Auth__FrontendBaseUrl=https://placeholder.pages.dev        # fix in step 4
 Cors__AllowedOrigins__0=https://placeholder.pages.dev      # fix in step 4
@@ -118,6 +119,8 @@ Render → Environment: set `Auth__FrontendBaseUrl` and `Cors__AllowedOrigins__0
 | Pages shows `PROXY_NOT_CONFIGURED` | `API_ORIGIN` not set for the Production environment (redeploy after setting) |
 | Login works but a reload signs you out | calling Render directly instead of `/api` on the Pages domain |
 | Everyone gets 429 on login | `PROXY_SECRET` and `ForwardedHeaders__ProxySecret` differ, so all users share Cloudflare's IP |
+| Every API call returns 403 `DIRECT_ACCESS_BLOCKED` | `RequireProxySecret=true` but the Pages `PROXY_SECRET` is missing or different. Calling the Render URL directly is *meant* to be blocked |
+| The API won't start: "ProxySecret must be at least 32 characters" | Use `openssl rand -hex 32` (64 characters). A short secret used to be silently ignored |
 | Every deep link 404s on Pages | a `404.html` was added to `public/` (it disables SPA fallback) |
 
 ## Free-tier notes (verified 2026-11-09, re-check before relying on them)

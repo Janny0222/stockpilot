@@ -17,5 +17,6 @@ const PAGES: Record<string, (id: string) => string> = {
 
 export function entityPath(entityType: string | null | undefined, id: string | null | undefined) {
   if (!entityType || !id) return null
-  return PAGES[entityType]?.(id) ?? null
+  // IDs are server-generated GUIDs, but encode anyway: a value like "../settings" or "x&y=" must never steer routing.
+  return PAGES[entityType]?.(encodeURIComponent(id)) ?? null
 }

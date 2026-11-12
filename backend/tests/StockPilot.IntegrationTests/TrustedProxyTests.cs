@@ -12,11 +12,29 @@ public sealed class TrustedProxyMiddlewareTests
 {
     private const string Secret = "test-proxy-secret-0123456789-abcdefghijkl";
 
+    private static IConfiguration Config(string? secret, bool required = false) => new ConfigurationBuilder()
+        .AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ForwardedHeaders:ProxySecret"] = secret,
+            ["ForwardedHeaders:RequireProxySecret"] = required.ToString(),
+        })
+        .Build();
+
+    private static async Task<(int Status, bool Reached)> RunRequiredAsync(string? secretHeader, string path)
+    {
+        var reached = false;
+        var middleware = new TrustedProxyClientIpMiddleware(_ => { reached = true; return Task.CompletedTask; }, Config(Secret, required: true));
+        var context = new DefaultHttpContext();
+        context.Request.Path = path;
+        context.Response.Body = new MemoryStream();
+        if (secretHeader is not null) context.Request.Headers[TrustedProxyClientIpMiddleware.SecretHeader] = secretHeader;
+        await middleware.InvokeAsync(context);
+        return (context.Response.StatusCode, reached);
+    }
+
     private static async Task<IPAddress?> RunAsync(string? secretHeader, string? clientIp, string? configuredSecret = Secret)
     {
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["ForwardedHeaders:ProxySecret"] = configuredSecret })
-            .Build();
+        var config = Config(configuredSecret);
 
         IPAddress? seen = null;
         var middleware = new TrustedProxyClientIpMiddleware(ctx =>
@@ -54,6 +72,22 @@ public sealed class TrustedProxyMiddlewareTests
     [Fact]
     public async Task Ignores_a_malformed_client_ip() =>
         (await RunAsync(Secret, "not-an-ip")).ShouldBe(IPAddress.Parse("10.0.0.1"));
+
+    [Fact]
+    public async Task When_required_direct_calls_without_the_secret_are_refused_except_health()
+    {
+        (await RunRequiredAsync(null, "/api/v1/auth/login")).ShouldBe((403, false));
+        (await RunRequiredAsync("guess", "/api/v1/auth/login")).ShouldBe((403, false));
+        (await RunRequiredAsync(Secret, "/api/v1/auth/login")).ShouldBe((200, true));
+        (await RunRequiredAsync(null, "/health/live")).ShouldBe((200, true)); // Render's health check and cron pings
+    }
+
+    [Fact]
+    public void A_short_or_missing_required_secret_stops_the_app_instead_of_being_ignored()
+    {
+        Should.Throw<InvalidOperationException>(() => new TrustedProxyClientIpMiddleware(_ => Task.CompletedTask, Config("too-short")));
+        Should.Throw<InvalidOperationException>(() => new TrustedProxyClientIpMiddleware(_ => Task.CompletedTask, Config(null, required: true)));
+    }
 }
 
 public sealed class ProxiedRateLimitApiFactory : ApiFactory
