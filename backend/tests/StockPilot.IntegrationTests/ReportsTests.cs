@@ -105,6 +105,52 @@ public sealed class ReportsTests(ApiFactory factory)
         forStaff.GetProperty("purchasing").ValueKind.ShouldNotBe(JsonValueKind.Null);
     }
 
+    /// <summary>
+    /// The sales report groups in the database (performance pass). The tricky number is "orders": one order with two
+    /// products counts once in EACH product's row, but only once in the total, never twice.
+    /// </summary>
+    [Fact]
+    public async Task Sales_report_groups_match_and_one_order_counts_once_in_the_total()
+    {
+        var w = await BuildAsync();
+        var c = w.Owner.Client;
+        var second = (await (await c.PostAsJsonAsync("/api/v1/products", new
+        {
+            name = "Switch", unitOfMeasure = "pcs", variants = new[] { new { sku = "S-1", costPrice = 40m, sellingPrice = 70m, reorderLevel = 0m } },
+        })).Content.ReadFromJsonAsync<JsonElement>(Json)).GetProperty("variants")[0].GetProperty("id").GetGuid();
+        await PostIdempotentAsync(c, "/api/v1/inventory/stock-in", new { warehouseId = w.Warehouse, lines = new[] { new { variantId = second, quantity = 10m, unitCost = 40m } } });
+
+        // One order, two products, fully shipped: bulb 2 × 150, switch 3 × 70.
+        var order = (await (await c.PostAsJsonAsync("/api/v1/sales-orders", new
+        {
+            customerId = w.Customer, warehouseId = w.Warehouse, orderDate = DateTime.UtcNow.ToString("yyyy-MM-dd"),
+            lines = new[] { new { variantId = w.Variant, quantity = 2m, unitPrice = 150m }, new { variantId = second, quantity = 3m, unitPrice = 70m } },
+        })).Content.ReadFromJsonAsync<JsonElement>(Json)).GetProperty("id").GetGuid();
+        (await c.PostAsync($"/api/v1/sales-orders/{order}/confirm", null)).EnsureSuccessStatusCode();
+        var items = (await c.GetFromJsonAsync<JsonElement>($"/api/v1/sales-orders/{order}", Json)).GetProperty("items").EnumerateArray()
+            .Select(i => new { itemId = i.GetProperty("id").GetGuid(), quantity = i.GetProperty("quantityOrdered").GetDecimal() }).ToArray();
+        await PostIdempotentAsync(c, $"/api/v1/sales-orders/{order}/shipments", new { lines = items });
+
+        var report = await c.GetFromJsonAsync<JsonElement>("/api/v1/reports/sales?groupBy=product", Json);
+        var cols = report.GetProperty("columns").EnumerateArray().Select(x => x.GetProperty("key").GetString()).ToList();
+        var rows = report.GetProperty("rows").EnumerateArray().ToDictionary(r => r[0].GetString()!.Split(' ')[0], r => r);
+
+        // Bulb: the first order (6 × 150) + this one (2 × 150) = 2 orders, 1,200. Switch: this order only.
+        rows["Bulb"][cols.IndexOf("orders")].GetInt32().ShouldBe(2);
+        rows["Bulb"][cols.IndexOf("revenue")].GetDecimal().ShouldBe(1200m);
+        rows["Switch"][cols.IndexOf("orders")].GetInt32().ShouldBe(1);
+        rows["Switch"][cols.IndexOf("revenue")].GetDecimal().ShouldBe(210m);
+
+        var totals = report.GetProperty("totals");
+        totals[cols.IndexOf("orders")].GetInt32().ShouldBe(2); // 2 distinct orders, not 2 + 1
+        totals[cols.IndexOf("revenue")].GetDecimal().ShouldBe(1410m);
+        totals[cols.IndexOf("cost")].GetDecimal().ShouldBe(800m + 120m); // (6 + 2) × 100 + 3 × 40
+
+        var byDay = await c.GetFromJsonAsync<JsonElement>("/api/v1/reports/sales?groupBy=day", Json);
+        byDay.GetProperty("totals")[cols.IndexOf("revenue")].GetDecimal().ShouldBe(1410m);
+        byDay.GetProperty("totals")[cols.IndexOf("orders")].GetInt32().ShouldBe(2);
+    }
+
     [Fact]
     public async Task Reports_agree_with_the_dashboard_and_respect_warehouse_scope()
     {

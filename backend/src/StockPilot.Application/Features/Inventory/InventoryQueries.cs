@@ -149,39 +149,47 @@ public sealed class ListMovementsHandler(IAppDbContext db, WarehouseAccessServic
         var allowed = await access.GetAccessibleWarehouseIdsAsync(ct);
         var canViewCost = await permissions.HasAsync(Permissions.Inventory.ViewCost, ct);
 
-        var rows =
-            from t in db.InventoryTransactions.AsNoTracking()
+        // Step 1: filter the ledger ITSELF. The page count (COUNT(*)) then runs on the ledger's own indexes, instead of
+        // over a four-way join on every row (performance pass: 300k rows, 134 ms → see docs/15-performance.md).
+        var ledger = db.InventoryTransactions.AsNoTracking();
+        if (allowed is not null) ledger = ledger.Where(t => allowed.Contains(t.WarehouseId));
+        if (query.WarehouseId is { } warehouseId) ledger = ledger.Where(t => t.WarehouseId == warehouseId);
+        if (query.VariantId is { } variantId) ledger = ledger.Where(t => t.ProductVariantId == variantId);
+        if (query.ProductId is { } productId) ledger = ledger.Where(t => db.ProductVariants.Any(v => v.Id == t.ProductVariantId && v.ProductId == productId));
+        if (query.Type is { } type) ledger = ledger.Where(t => t.Type == type);
+        if (query.From is { } from) ledger = ledger.Where(t => t.OccurredAt >= from);
+        if (query.To is { } to) ledger = ledger.Where(t => t.OccurredAt < to);
+
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var term = query.Search.Trim().ToLowerInvariant();
+            ledger = ledger.Where(t =>
+                (t.Reference != null && t.Reference.ToLower().Contains(term)) ||
+                db.ProductVariants.Any(v => v.Id == t.ProductVariantId && (v.Sku.ToLower().Contains(term)
+                    || db.Products.Any(p => p.Id == v.ProductId && p.Name.ToLower().Contains(term)))));
+        }
+
+        var total = await ledger.CountAsync(ct);
+
+        // Step 2: only this page's rows get joined to names.
+        var items = await (
+            from t in ledger.OrderByDescending(t => t.OccurredAt).ThenByDescending(t => t.Id)
+                .Skip((query.SafePage - 1) * query.SafePageSize).Take(query.SafePageSize)
             join w in db.Warehouses on t.WarehouseId equals w.Id
             join v in db.ProductVariants on t.ProductVariantId equals v.Id
             join p in db.Products on v.ProductId equals p.Id
             join u in db.Users on t.PerformedBy equals u.Id into users
             from u in users.DefaultIfEmpty()
-            select new { t, w, v, p, u };
+            orderby t.OccurredAt descending, t.Id descending
+            select new MovementDto(
+                t.Id, t.OccurredAt, t.Type, w.Id, w.Code, p.Id, p.Name, v.Sku, v.Name,
+                t.QuantityChange, t.QuantityAfter, canViewCost ? t.UnitCost : null,
+                t.Reference, t.Note, t.Reason,
+                u != null ? u.FirstName + " " + u.LastName : null,
+                t.SourceType, t.SourceId))
+            .ToListAsync(ct);
 
-        if (allowed is not null) rows = rows.Where(r => allowed.Contains(r.w.Id));
-        if (query.WarehouseId is { } warehouseId) rows = rows.Where(r => r.t.WarehouseId == warehouseId);
-        if (query.VariantId is { } variantId) rows = rows.Where(r => r.t.ProductVariantId == variantId);
-        if (query.ProductId is { } productId) rows = rows.Where(r => r.v.ProductId == productId);
-        if (query.Type is { } type) rows = rows.Where(r => r.t.Type == type);
-        if (query.From is { } from) rows = rows.Where(r => r.t.OccurredAt >= from);
-        if (query.To is { } to) rows = rows.Where(r => r.t.OccurredAt < to);
-
-        if (!string.IsNullOrWhiteSpace(query.Search))
-        {
-            var term = query.Search.Trim().ToLowerInvariant();
-            rows = rows.Where(r => r.p.Name.ToLower().Contains(term) || r.v.Sku.ToLower().Contains(term)
-                || (r.t.Reference != null && r.t.Reference.ToLower().Contains(term)));
-        }
-
-        return await rows
-            .OrderByDescending(r => r.t.OccurredAt).ThenByDescending(r => r.t.Id)
-            .Select(r => new MovementDto(
-                r.t.Id, r.t.OccurredAt, r.t.Type, r.w.Id, r.w.Code, r.p.Id, r.p.Name, r.v.Sku, r.v.Name,
-                r.t.QuantityChange, r.t.QuantityAfter, canViewCost ? r.t.UnitCost : null,
-                r.t.Reference, r.t.Note, r.t.Reason,
-                r.u != null ? r.u.FirstName + " " + r.u.LastName : null,
-                r.t.SourceType, r.t.SourceId))
-            .ToPagedResultAsync(query, ct);
+        return new PagedResult<MovementDto>(items, query.SafePage, query.SafePageSize, total);
     }
 }
 

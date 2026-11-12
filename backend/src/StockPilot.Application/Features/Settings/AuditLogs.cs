@@ -64,17 +64,21 @@ public sealed class ListAuditLogsHandler(IAppDbContext db, ReportClock clock)
             }
         }
 
-        var page = await (
-            from a in logs
+        // Count the log rows alone, then join names onto this page only (performance pass: counting through the users
+        // join over 200k rows was most of the time).
+        var total = await logs.CountAsync(ct);
+        var items = await (
+            from a in logs.OrderByDescending(a => a.OccurredAt).ThenByDescending(a => a.Id)
+                .Skip((query.SafePage - 1) * query.SafePageSize).Take(query.SafePageSize)
             join u in db.Users on a.UserId equals u.Id into users
             from u in users.DefaultIfEmpty()
             orderby a.OccurredAt descending, a.Id descending
             select new { a.Id, a.OccurredAt, a.Action, a.EntityType, a.EntityId, a.UserId, UserName = u == null ? null : u.FirstName + " " + u.LastName, a.IpAddress, a.Changes }
-        ).ToPagedResultAsync(query, ct);
+        ).ToListAsync(ct);
 
         return new PagedResult<AuditLogDto>(
-            page.Items.Select(a => new AuditLogDto(a.Id, a.OccurredAt, a.Action, a.EntityType, a.EntityId, a.UserId, a.UserName, a.IpAddress, ParseChanges(a.Changes))).ToList(),
-            page.Page, page.PageSize, page.TotalCount);
+            items.Select(a => new AuditLogDto(a.Id, a.OccurredAt, a.Action, a.EntityType, a.EntityId, a.UserId, a.UserName, a.IpAddress, ParseChanges(a.Changes))).ToList(),
+            query.SafePage, query.SafePageSize, total);
     }
 
     /// <summary>{"Name":{"old":"A","new":"B"}} → [Name: A → B]. Anything unexpected is skipped, never thrown.</summary>

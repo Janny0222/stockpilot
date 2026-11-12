@@ -123,15 +123,15 @@ public sealed class GetDashboardHandler(IAppDbContext db, WarehouseAccessService
         IReadOnlyCollection<Guid>? warehouseIds, TimeZoneInfo zone, DateOnly from, DateOnly today,
         DateTimeOffset start, DateTimeOffset previousStart, bool canViewCost, CancellationToken ct)
     {
-        // Shipped lines of the current AND previous period. Small for an SMB (a few thousand rows a quarter), so
-        // bucketing by local day happens here, where the company's time zone is known exactly.
+        // Shipped lines of the current AND previous period, bucketed by local day here, where the company's time zone
+        // is known exactly. Numbers only: product NAMES are fetched afterwards for the top 5 alone (performance pass:
+        // carrying a name on each of ~30,000 lines for 90 days cost more than the query itself).
         var lines = await (
             from si in db.SalesShipmentItems.AsNoTracking()
             join sh in db.SalesShipments on si.SalesShipmentId equals sh.Id
             join v in db.ProductVariants on si.ProductVariantId equals v.Id
-            join p in db.Products on v.ProductId equals p.Id
             where sh.ShippedAt >= previousStart && (warehouseIds == null || warehouseIds.Contains(sh.WarehouseId))
-            select new { sh.ShippedAt, sh.SalesOrderId, ProductId = p.Id, ProductName = p.Name, si.Quantity, si.UnitPrice, si.UnitCost })
+            select new { sh.ShippedAt, sh.SalesOrderId, v.ProductId, si.Quantity, si.UnitPrice, si.UnitCost })
             .ToListAsync(ct);
 
         var current = lines.Where(l => l.ShippedAt >= start).ToList();
@@ -163,9 +163,18 @@ public sealed class GetDashboardHandler(IAppDbContext db, WarehouseAccessService
             trend.Add(new SalesTrendPointDto(day, dayRevenue, canViewCost ? dayRevenue - dayCost : null));
         }
 
-        var top = current
-            .GroupBy(l => new { l.ProductId, l.ProductName })
-            .Select(g => new TopProductDto(g.Key.ProductId, g.Key.ProductName, g.Sum(l => l.Quantity), decimal.Round(g.Sum(l => l.Quantity * l.UnitPrice), 2)))
+        var byProduct = current
+            .GroupBy(l => l.ProductId)
+            .Select(g => (ProductId: g.Key, Quantity: g.Sum(l => l.Quantity), Revenue: decimal.Round(g.Sum(l => l.Quantity * l.UnitPrice), 2)))
+            .OrderByDescending(t => t.Revenue)
+            .ToList();
+        // Names for the top 5 plus anything tied with the 5th (ties are broken by name, so those need names too).
+        var cutoff = byProduct.Count > 5 ? byProduct[4].Revenue : decimal.MinValue;
+        var contenders = byProduct.Where(t => t.Revenue >= cutoff).ToList();
+        var ids = contenders.Select(t => t.ProductId).ToList();
+        var names = await db.Products.AsNoTracking().Where(p => ids.Contains(p.Id)).ToDictionaryAsync(p => p.Id, p => p.Name, ct);
+        var top = contenders
+            .Select(t => new TopProductDto(t.ProductId, names[t.ProductId], t.Quantity, t.Revenue))
             .OrderByDescending(t => t.Revenue).ThenBy(t => t.ProductName)
             .Take(5)
             .ToList();
