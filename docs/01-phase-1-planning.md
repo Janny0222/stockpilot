@@ -82,7 +82,7 @@ These are the decisions that shape everything else. Items marked **[CONFIRM]** c
 - **Infrastructure** defines *how* those interfaces are implemented (Npgsql, StackExchange.Redis, the S3 SDK for R2).
 - **API** turns HTTP into application calls and back. Controllers have no business logic: they authorise, call a handler, and map the result to a status code.
 
-**Mentor note — repositories.** EF Core's `DbContext` already is a unit of work and `DbSet<T>` already is a repository. Wrapping every entity in `IProductRepository` adds code without adding value. Instead, Application depends on an `IAppDbContext` interface that exposes the `DbSet`s. This is a pragmatic, widely used Clean Architecture variant. We add a dedicated abstraction only where it earns its place, for example `IStockLockService` for the raw `SELECT … FOR UPDATE`.
+**Design note: repositories.** EF Core's `DbContext` already is a unit of work and `DbSet<T>` already is a repository. Wrapping every entity in `IProductRepository` adds code without adding value. Instead, Application depends on an `IAppDbContext` interface that exposes the `DbSet`s. This is a pragmatic, widely used Clean Architecture variant. We add a dedicated abstraction only where it earns its place, for example `IStockLockService` for the raw `SELECT … FOR UPDATE`.
 
 ### 1.3 Request lifecycle (how data flows)
 
@@ -410,7 +410,7 @@ erDiagram
 4. **Transient failures** (deadlock `40P01`, serialisation `40001`, Neon connection drop) are retried with Npgsql's execution strategy. The whole unit of work is retried, not single statements.
 5. **Side effects after commit.** Notifications and SignalR pushes happen *after* commit, so we never notify about a rolled-back change. A Hangfire job is used where delivery must be durable.
 
-**Mentor note — why not just `UPDATE stock SET qty = qty - 5`?** On its own that statement is atomic. But then the business rule ("not below zero unless policy allows") lives in SQL instead of the domain, and you still need the ledger insert in the same transaction. Locking the row, applying a domain method and saving both rows in one transaction keeps rules testable *and* correct under concurrency. We'll prove it with a test that fires 50 parallel stock-outs at a stock of 10 and asserts exactly 10 succeed.
+**Design note: why not just `UPDATE stock SET qty = qty - 5`?** On its own that statement is atomic. But then the business rule ("not below zero unless policy allows") lives in SQL instead of the domain, and you still need the ledger insert in the same transaction. Locking the row, applying a domain method and saving both rows in one transaction keeps rules testable *and* correct under concurrency. We'll prove it with a test that fires 50 parallel stock-outs at a stock of 10 and asserts exactly 10 succeed.
 
 ---
 

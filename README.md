@@ -31,7 +31,6 @@ backend/
     StockPilot.UnitTests/         fast, no database (domain, validators, security primitives, architecture rules)
     StockPilot.IntegrationTests/  real HTTP pipeline + real PostgreSQL
 docs/                           planning, ERD, architecture notes
-scripts/                        dev helpers
 docker-compose.yml              postgres + mailpit + api
 ```
 

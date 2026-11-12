@@ -1,6 +1,6 @@
 # Phase 2: Backend Foundation (how it works and why)
 
-This is the mentor's walkthrough of what was built and the reasoning behind it. Read it alongside the code;
+A walkthrough of what was built in Phase 2 and the reasoning behind it. Read it alongside the code;
 file references are clickable in most editors.
 
 ---
@@ -117,7 +117,7 @@ those transactions so a transient Neon disconnect retries the *whole* unit of wo
 |---|---|---|
 | App exits on start: *"Jwt:SigningKey must be at least 32 bytes"* | no key configured | set `Jwt__SigningKey` (prod) or run with `ASPNETCORE_ENVIRONMENT=Development` |
 | *"development JWT signing key must not be used outside Development"* | dev key in prod | generate a real key: `openssl rand -base64 48` |
-| `Failed to connect to 127.0.0.1:5433` | DB not running | `./scripts/dev-postgres.ps1 start` or `docker compose up -d postgres` |
+| `Failed to connect to 127.0.0.1:5433` | DB not running | `docker compose up -d postgres`, or check the Neon connection string in User Secrets |
 | 401 on every call in Swagger | token expired (15 min) or not "Bearer"-prefixed | log in again; Swagger adds "Bearer" for you |
 | 403 with a valid token | missing permission | check `GET /auth/me` → `permissions` |
 | 404 on a record you know exists | it belongs to another tenant (by design) or your warehouse scope excludes it | log in as that tenant's user |
