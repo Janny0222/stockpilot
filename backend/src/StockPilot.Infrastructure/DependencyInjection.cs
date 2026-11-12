@@ -8,6 +8,7 @@ using StockPilot.Application.Common.Abstractions;
 using StockPilot.Application.Common.Options;
 using StockPilot.Infrastructure.Email;
 using StockPilot.Infrastructure.Identity;
+using StockPilot.Infrastructure.Jobs;
 using StockPilot.Infrastructure.Persistence;
 using StockPilot.Infrastructure.Persistence.Interceptors;
 
@@ -88,6 +89,11 @@ public static class DependencyInjection
             sp.GetRequiredService<IOptions<EmailOptions>>().Value.Provider.Equals("Log", StringComparison.OrdinalIgnoreCase)
                 ? sp.GetRequiredService<LoggingEmailSender>()
                 : sp.GetRequiredService<SmtpEmailSender>());
+
+        // ---- Background jobs (in-process; see Jobs/JobScheduling.cs for why not Hangfire)
+        services.AddOptions<JobsOptions>().Bind(configuration.GetSection(JobsOptions.SectionName));
+        services.AddSingleton<IJobRunner, Jobs.JobRunner>();
+        services.AddHostedService<Jobs.JobScheduler>();
 
         return services;
     }

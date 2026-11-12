@@ -50,6 +50,7 @@ public interface IAppDbContext
     DbSet<SalesShipmentItem> SalesShipmentItems { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<NotificationPreference> NotificationPreferences { get; }
+    DbSet<Domain.Platform.JobRun> JobRuns { get; }
 
     /// <summary>
     /// Runs <paramref name="work"/> inside ONE database transaction, retrying the WHOLE unit of work on transient

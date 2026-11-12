@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api/client'
-import type { PageParams, PagedResult, PlatformMetricsDto, TenantStatus, TenantSummaryDto } from '@/lib/api/types'
+import type { JobRunOutcome, JobStatusDto, PageParams, PagedResult, PlatformMetricsDto, TenantStatus, TenantSummaryDto } from '@/lib/api/types'
 
 export type TenantParams = PageParams & { status?: TenantStatus }
 
@@ -30,6 +30,22 @@ export function useTenant(id: string) {
   return useQuery({
     queryKey: platformKeys.detail(id),
     queryFn: ({ signal }) => api.get<TenantSummaryDto>(`/platform/tenants/${id}`, { signal }).then((r) => r.data),
+  })
+}
+
+export function useJobs() {
+  return useQuery({
+    queryKey: [...platformKeys.all, 'jobs'] as const,
+    queryFn: ({ signal }) => api.get<JobStatusDto[]>('/platform/jobs', { signal }).then((r) => r.data),
+  })
+}
+
+/** Runs a job now and waits for it (they take seconds), then refreshes the status table. */
+export function useRunJob() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (name: string) => api.post<JobRunOutcome>(`/platform/jobs/${name}/run`).then((r) => r.data),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: [...platformKeys.all, 'jobs'] }),
   })
 }
 

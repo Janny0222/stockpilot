@@ -65,7 +65,8 @@ export function useNotificationPreferences() {
 export function useUpdateNotificationPreference() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (pref: { type: NotificationType; inApp: boolean }) =>
+    // Send only the switch that changed; the API leaves the other one as it is.
+    mutationFn: (pref: { type: NotificationType; inApp?: boolean; email?: boolean }) =>
       api.put<NotificationPreferenceDto[]>('/notifications/preferences', { preferences: [pref] }).then((r) => r.data),
     onSuccess: (data) => queryClient.setQueryData(notificationKeys.preferences, data),
   })

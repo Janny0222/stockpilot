@@ -1964,6 +1964,88 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/platform/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["JobStatusDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/platform/jobs/{name}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Runs a job now (same lock and record as the scheduler). Returns when it finishes. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    name: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["JobRunOutcome"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/platform/tenants/{id}/activate": {
         parameters: {
             query?: never;
@@ -3937,6 +4019,29 @@ export interface components {
             roleId: string;
             warehouseIds: null | string[];
         };
+        /** @description Result of asking for a job run. Ran=false means another run held the lock, so this one was skipped. */
+        JobRunOutcome: {
+            name: string;
+            ran: boolean;
+            succeeded: null | boolean;
+            message: string;
+        };
+        JobStatusDto: {
+            name: string;
+            description: string;
+            schedule: string;
+            /** Format: date-time */
+            nextRunAt: string;
+            dueNow: boolean;
+            /** Format: date-time */
+            lastStartedAt: null | string;
+            /** Format: date-time */
+            lastFinishedAt: null | string;
+            lastSucceeded: null | boolean;
+            lastMessage: null | string;
+            /** Format: int32 */
+            lastDurationMs: null | number;
+        };
         LoginCommand: {
             email: string;
             password: string;
@@ -4027,15 +4132,20 @@ export interface components {
             /** Format: date-time */
             readAt: null | string;
         };
+        /** @description EmailLabel is null when the type has no email version (the UI then shows no email switch). */
         NotificationPreferenceDto: {
             type: components["schemas"]["NotificationType"];
             label: string;
             description: string;
             inApp: boolean;
+            email: boolean;
+            emailLabel: null | string;
         };
+        /** @description Null leaves that switch as it is, so the UI can flip one switch without knowing the others. */
         NotificationPreferenceInput: {
             type: components["schemas"]["NotificationType"];
-            inApp: boolean;
+            inApp: null | boolean;
+            email: null | boolean;
         };
         /**
          * @description What happened. Stored as text, so add new values freely; never rename one.

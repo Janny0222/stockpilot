@@ -37,6 +37,7 @@ internal sealed class AuditingInterceptor(ICurrentUser currentUser, TimeProvider
         typeof(Domain.Inventory.InventoryTransaction), typeof(Domain.Inventory.WarehouseStock), typeof(IdempotencyRecord),
         // Notifications are messages about changes that are already audited; logging them (and every "read") is noise.
         typeof(Domain.Notifications.Notification), typeof(Domain.Notifications.NotificationPreference),
+        typeof(Domain.Platform.JobRun), // bookkeeping of the scheduler itself
     ];
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)

@@ -124,7 +124,14 @@ describe('Notifications page', () => {
 describe('Notification preferences', () => {
   it('turns a type off with a switch', async () => {
     let prefs: NotificationPreferenceDto[] = [
-      { type: 'LowStock', label: 'Low and out-of-stock items', description: 'When an item drops to its reorder level.', inApp: true },
+      {
+        type: 'LowStock',
+        label: 'Low and out-of-stock items',
+        description: 'When an item drops to its reorder level.',
+        inApp: true,
+        email: false,
+        emailLabel: 'Daily email with everything that needs reordering',
+      },
     ]
     let body: unknown = null
     server.use(
@@ -144,5 +151,34 @@ describe('Notification preferences', () => {
 
     await waitFor(() => expect(toggle).not.toBeChecked())
     expect(body).toEqual({ preferences: [{ type: 'LowStock', inApp: false }] })
+  })
+
+  it('offers the daily email only where it exists, and sends just that switch', async () => {
+    let body: unknown = null
+    server.use(
+      http.get(apiUrl('/notifications/preferences'), () =>
+        HttpResponse.json([
+          { type: 'LowStock', label: 'Low and out-of-stock items', description: 'd', inApp: true, email: false, emailLabel: 'Daily email' },
+          { type: 'UserJoined', label: 'New team members', description: 'd', inApp: true, email: false, emailLabel: null },
+        ]),
+      ),
+      http.put(apiUrl('/notifications/preferences'), async ({ request }) => {
+        body = await request.json()
+        return HttpResponse.json([
+          { type: 'LowStock', label: 'Low and out-of-stock items', description: 'd', inApp: true, email: true, emailLabel: 'Daily email' },
+          { type: 'UserJoined', label: 'New team members', description: 'd', inApp: true, email: false, emailLabel: null },
+        ])
+      }),
+    )
+    const user = userEvent.setup()
+    renderRoute(<NotificationPreferencesPage />, { path: '/settings/notifications' })
+
+    const email = await screen.findByRole('switch', { name: 'Daily email' })
+    expect(email).not.toBeChecked()
+    expect(screen.getAllByRole('switch')).toHaveLength(3) // two in-app switches, one email switch
+
+    await user.click(email)
+    await waitFor(() => expect(email).toBeChecked())
+    expect(body).toEqual({ preferences: [{ type: 'LowStock', email: true }] })
   })
 })

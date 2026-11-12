@@ -1,4 +1,4 @@
-import { BellOff, CheckCheck, Settings2 } from 'lucide-react'
+import { BellOff, CheckCheck, Mail, Settings2 } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { Pagination } from '@/components/shared/data-table'
@@ -129,10 +129,10 @@ export function NotificationPreferencesPage() {
 
   return (
     <>
-      <PageHeader title="Notifications" description="Choose what shows up in your bell. This only affects you." />
+      <PageHeader title="Notifications" description="Choose what reaches you, in the app and by email. This only affects you." />
       <Card className="max-w-3xl shadow-card">
         <CardHeader>
-          <CardTitle>In the app</CardTitle>
+          <CardTitle>What you hear about</CardTitle>
           <CardDescription>You only see the kinds of notifications your role can act on.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -150,42 +150,39 @@ export function NotificationPreferencesPage() {
               {prefs.data.map((p) => {
                 const id = `pref-${p.type}`
                 const saving = update.isPending && update.variables?.type === p.type
+                const save = (change: { inApp?: boolean; email?: boolean }, what: string, on: boolean) =>
+                  update.mutate(
+                    { type: p.type, ...change },
+                    { onSuccess: () => toast.success(`${what}: ${on ? 'on' : 'off'}.`), onError: (e) => toast.error(toApiError(e).message) },
+                  )
                 return (
-                  <li key={p.type} className="flex items-start justify-between gap-6 py-4 first:pt-0 last:pb-0">
-                    <div>
-                      <label htmlFor={id} className="font-medium">
-                        {p.label}
-                      </label>
-                      <p id={`${id}-hint`} className="mt-0.5 text-sm text-muted-foreground">
-                        {p.description}
-                      </p>
+                  <li key={p.type} className="grid gap-3 py-4 first:pt-0 last:pb-0">
+                    <div className="flex items-start justify-between gap-6">
+                      <div>
+                        <label htmlFor={id} className="font-medium">
+                          {p.label}
+                        </label>
+                        <p id={`${id}-hint`} className="mt-0.5 text-sm text-muted-foreground">
+                          {p.description}
+                        </p>
+                      </div>
+                      <Switch id={id} describedBy={`${id}-hint`} checked={p.inApp} disabled={saving} onToggle={() => save({ inApp: !p.inApp }, p.label, !p.inApp)} />
                     </div>
-                    <button
-                      id={id}
-                      type="button"
-                      role="switch"
-                      aria-checked={p.inApp}
-                      aria-describedby={`${id}-hint`}
-                      disabled={saving}
-                      onClick={() =>
-                        update.mutate(
-                          { type: p.type, inApp: !p.inApp },
-                          {
-                            onSuccess: () => toast.success(`${p.label}: ${p.inApp ? 'off' : 'on'}.`),
-                            onError: (e) => toast.error(toApiError(e).message),
-                          },
-                        )
-                      }
-                      className={cn(
-                        'relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60',
-                        p.inApp ? 'bg-primary' : 'bg-input',
-                      )}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={cn('inline-block size-5 rounded-full bg-white shadow transition-transform', p.inApp ? 'translate-x-5.5' : 'translate-x-0.5')}
-                      />
-                    </button>
+                    {p.emailLabel && (
+                      // Email is opt-in, so it sits under the in-app switch as its own, separate choice.
+                      <div className="ml-4 flex items-start justify-between gap-6 border-l-2 pl-4">
+                        <label htmlFor={`${id}-email`} className="flex items-center gap-2 text-sm">
+                          <Mail className="size-4 text-muted-foreground" aria-hidden="true" />
+                          {p.emailLabel}
+                        </label>
+                        <Switch
+                          id={`${id}-email`}
+                          checked={p.email}
+                          disabled={saving}
+                          onToggle={() => save({ email: !p.email }, p.emailLabel!, !p.email)}
+                        />
+                      </div>
+                    )}
                   </li>
                 )
               })}
@@ -194,5 +191,25 @@ export function NotificationPreferencesPage() {
         </CardContent>
       </Card>
     </>
+  )
+}
+
+function Switch({ id, checked, disabled, onToggle, describedBy }: { id: string; checked: boolean; disabled?: boolean; onToggle: () => void; describedBy?: string }) {
+  return (
+    <button
+      id={id}
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-describedby={describedBy}
+      disabled={disabled}
+      onClick={onToggle}
+      className={cn(
+        'relative mt-0.5 inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60',
+        checked ? 'bg-primary' : 'bg-input',
+      )}
+    >
+      <span aria-hidden="true" className={cn('inline-block size-5 rounded-full bg-white shadow transition-transform', checked ? 'translate-x-5.5' : 'translate-x-0.5')} />
+    </button>
   )
 }

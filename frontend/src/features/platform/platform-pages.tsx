@@ -24,6 +24,7 @@ import { formatDay, timeAgo } from '@/lib/format'
 import { Permissions as P } from '@/lib/permissions'
 import { useHasPermission } from '@/stores/auth-store'
 import { usePlatformMetrics, useSetTenantStatus, useTenant, useTenants } from './api'
+import { JobsCard } from './jobs-card'
 
 const count = new Intl.NumberFormat('en-PH')
 
@@ -183,6 +184,8 @@ export function CompaniesPage() {
           </>
         )}
       </Card>
+
+      <JobsCard />
     </>
   )
 }

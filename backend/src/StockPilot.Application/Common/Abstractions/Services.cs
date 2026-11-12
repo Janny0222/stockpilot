@@ -111,3 +111,12 @@ public interface IRealtimeNotifier
 {
     Task PushAsync(IReadOnlyList<RealtimeNotification> notifications, CancellationToken cancellationToken);
 }
+
+/// <summary>Result of asking for a job run. Ran=false means another run held the lock, so this one was skipped.</summary>
+public sealed record JobRunOutcome(string Name, bool Ran, bool? Succeeded, string Message);
+
+/// <summary>Runs a background job by name, at most one run of it at a time across all instances, and records the result.</summary>
+public interface IJobRunner
+{
+    Task<JobRunOutcome> RunAsync(string name, CancellationToken cancellationToken);
+}

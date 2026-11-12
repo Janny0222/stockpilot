@@ -68,19 +68,23 @@ public sealed class Notification : Entity, ITenantOwned
 }
 
 /// <summary>
-/// Opt-out per person and type. No row means "on": a new type reaches everyone it concerns until they turn it off.
-/// Email delivery (M11) will add an Email flag next to InApp.
+/// Per person and type. No row means the defaults: in-app ON (a new type reaches everyone it concerns until they turn
+/// it off) and email OFF (email is opt-in: nobody gets mail they didn't ask for).
 /// </summary>
 public sealed class NotificationPreference : ITenantOwned
 {
+    public const bool DefaultInApp = true;
+    public const bool DefaultEmail = false;
+
     private NotificationPreference() { }
 
-    public NotificationPreference(Guid tenantId, Guid userId, NotificationType type, bool inApp)
+    public NotificationPreference(Guid tenantId, Guid userId, NotificationType type, bool inApp, bool email = DefaultEmail)
     {
         TenantId = tenantId;
         UserId = userId;
         Type = type;
         InApp = inApp;
+        Email = email;
     }
 
     public Guid TenantId { get; private set; }
@@ -88,5 +92,12 @@ public sealed class NotificationPreference : ITenantOwned
     public NotificationType Type { get; private set; }
     public bool InApp { get; private set; }
 
-    public void Set(bool inApp) => InApp = inApp;
+    /// <summary>Email delivery. Today only LowStock offers it, as a once-a-day digest.</summary>
+    public bool Email { get; private set; }
+
+    public void Set(bool inApp, bool email)
+    {
+        InApp = inApp;
+        Email = email;
+    }
 }

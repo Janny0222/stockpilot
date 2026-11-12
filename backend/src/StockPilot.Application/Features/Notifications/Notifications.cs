@@ -19,9 +19,11 @@ public sealed record UnreadCountDto(int Count);
 
 public sealed record MarkAllReadResult(int Marked);
 
-public sealed record NotificationPreferenceDto(NotificationType Type, string Label, string Description, bool InApp);
+/// <summary>EmailLabel is null when the type has no email version (the UI then shows no email switch).</summary>
+public sealed record NotificationPreferenceDto(NotificationType Type, string Label, string Description, bool InApp, bool Email, string? EmailLabel);
 
-public sealed record NotificationPreferenceInput(NotificationType Type, bool InApp);
+/// <summary>Null leaves that switch as it is, so the UI can flip one switch without knowing the others.</summary>
+public sealed record NotificationPreferenceInput(NotificationType Type, bool? InApp, bool? Email);
 
 public sealed record UpdateNotificationPreferencesCommand(IReadOnlyList<NotificationPreferenceInput> Preferences);
 
@@ -90,11 +92,19 @@ public sealed class GetNotificationPreferencesHandler(IAppDbContext db, ICurrent
     {
         var userId = MyNotifications.UserId(currentUser);
         var granted = currentUser.RoleId is { } roleId ? await permissions.GetPermissionsAsync(roleId, ct) : new HashSet<string>();
-        var off = await db.NotificationPreferences.Where(p => p.UserId == userId && !p.InApp).Select(p => p.Type).ToListAsync(ct);
+        var saved = await db.NotificationPreferences.Where(p => p.UserId == userId).ToDictionaryAsync(p => p.Type, ct);
 
         return NotificationCatalog.All
             .Where(t => granted.Contains(t.Permission))
-            .Select(t => new NotificationPreferenceDto(t.Type, t.Label, t.Description, !off.Contains(t.Type)))
+            .Select(t =>
+            {
+                saved.TryGetValue(t.Type, out var p);
+                return new NotificationPreferenceDto(
+                    t.Type, t.Label, t.Description,
+                    p?.InApp ?? NotificationPreference.DefaultInApp,
+                    t.EmailLabel is not null && (p?.Email ?? NotificationPreference.DefaultEmail),
+                    t.EmailLabel);
+            })
             .ToList();
     }
 }
@@ -105,6 +115,9 @@ public sealed class UpdateNotificationPreferencesValidator : AbstractValidator<U
     {
         RuleFor(x => x.Preferences).NotNull();
         RuleForEach(x => x.Preferences).Must(p => Enum.IsDefined(p.Type)).WithMessage("Unknown notification type.");
+        RuleForEach(x => x.Preferences)
+            .Must(p => p.Email != true || NotificationCatalog.All.Any(t => t.Type == p.Type && t.EmailLabel is not null))
+            .WithMessage("This notification isn't available by email.");
     }
 }
 
@@ -120,8 +133,10 @@ public sealed class UpdateNotificationPreferencesHandler(
         var existing = await db.NotificationPreferences.Where(p => p.UserId == userId).ToDictionaryAsync(p => p.Type, ct);
         foreach (var input in command.Preferences.DistinctBy(p => p.Type))
         {
-            if (existing.TryGetValue(input.Type, out var row)) row.Set(input.InApp);
-            else db.NotificationPreferences.Add(new NotificationPreference(tenantId, userId, input.Type, input.InApp));
+            // Partial update: a switch the request doesn't mention keeps its current (or default) value.
+            if (existing.TryGetValue(input.Type, out var row)) row.Set(input.InApp ?? row.InApp, input.Email ?? row.Email);
+            else db.NotificationPreferences.Add(new NotificationPreference(
+                tenantId, userId, input.Type, input.InApp ?? NotificationPreference.DefaultInApp, input.Email ?? NotificationPreference.DefaultEmail));
         }
 
         await db.SaveChangesAsync(ct);

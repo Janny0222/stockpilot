@@ -27,6 +27,10 @@ public static class DependencyInjection
         services.AddScoped<Features.Settings.UserAssignment>();
         services.AddScoped<Features.Notifications.NotificationPublisher>();
         services.AddScoped<Features.Notifications.LowStockAlerts>();
+        foreach (var job in Features.Platform.PlatformJobs.All)
+        {
+            services.AddScoped(job.JobType); // resolved by name from a fresh scope per run
+        }
         services.AddScoped<Features.Auth.Common.AuthTokenIssuer>();
         services.AddScoped<Features.Auth.Common.AuthEmailService>();
 

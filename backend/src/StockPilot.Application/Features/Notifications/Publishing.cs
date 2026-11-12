@@ -6,8 +6,11 @@ using StockPilot.Domain.Notifications;
 
 namespace StockPilot.Application.Features.Notifications;
 
-/// <summary>Permission is who it concerns: only people whose role has it receive this type.</summary>
-public sealed record NotificationTypeInfo(NotificationType Type, string Permission, string Label, string Description);
+/// <summary>
+/// Permission is who it concerns: only people whose role has it receive this type. EmailLabel, when set, offers an email
+/// version (opt-in) and names it on the preferences screen.
+/// </summary>
+public sealed record NotificationTypeInfo(NotificationType Type, string Permission, string Label, string Description, string? EmailLabel = null);
 
 /// <summary>Every notification type, who it goes to, and how it's described on the preferences screen.</summary>
 public static class NotificationCatalog
@@ -15,7 +18,8 @@ public static class NotificationCatalog
     public static IReadOnlyList<NotificationTypeInfo> All { get; } =
     [
         new(NotificationType.LowStock, Permissions.Purchases.Manage,
-            "Low and out-of-stock items", "When an item drops to its reorder level or runs out, in the warehouses you can see."),
+            "Low and out-of-stock items", "When an item drops to its reorder level or runs out, in the warehouses you can see.",
+            EmailLabel: "Daily email with everything that needs reordering"),
         new(NotificationType.PurchaseOrderAwaitingApproval, Permissions.Purchases.Approve,
             "Purchase orders to approve", "When someone submits a purchase order for approval."),
         new(NotificationType.PurchaseOrderApproved, Permissions.Purchases.Receive,

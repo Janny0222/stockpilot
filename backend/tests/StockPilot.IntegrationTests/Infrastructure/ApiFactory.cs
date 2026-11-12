@@ -67,6 +67,7 @@ public class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         builder.UseSetting("Jwt:SigningKey", "integration-test-signing-key-0123456789-abcdefghijklmnop");
         builder.UseSetting("Database:MigrateOnStartup", "true");
         builder.UseSetting("Auth:SessionValidationCacheDuration", "00:00:00"); // see revocations immediately
+        builder.UseSetting("Jobs:Enabled", "false"); // tests run jobs explicitly, never on a timer
         builder.UseSetting("Auth:RefreshTokenReuseGracePeriod", "00:00:00");   // any reuse = theft, deterministically
         builder.UseSetting("RateLimiting:AuthPermitLimit", "100000");
         builder.UseSetting("RateLimiting:GlobalPermitLimit", "100000");

@@ -34,3 +34,13 @@ internal sealed class NotificationPreferenceConfiguration : IEntityTypeConfigura
         builder.HasOne<User>().WithMany().HasForeignKey(p => p.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+
+internal sealed class JobRunConfiguration : IEntityTypeConfiguration<Domain.Platform.JobRun>
+{
+    public void Configure(EntityTypeBuilder<Domain.Platform.JobRun> builder)
+    {
+        builder.HasKey(j => j.Name);
+        builder.Property(j => j.Name).HasMaxLength(64);
+        builder.Property(j => j.LastMessage).HasMaxLength(Domain.Platform.JobRun.MessageMaxLength);
+    }
+}

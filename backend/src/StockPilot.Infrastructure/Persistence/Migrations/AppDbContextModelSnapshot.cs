@@ -1729,6 +1729,10 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("type");
 
+                    b.Property<bool>("Email")
+                        .HasColumnType("boolean")
+                        .HasColumnName("email");
+
                     b.Property<bool>("InApp")
                         .HasColumnType("boolean")
                         .HasColumnName("in_app");
@@ -1744,6 +1748,40 @@ namespace StockPilot.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_notification_preferences_tenant_id");
 
                     b.ToTable("notification_preferences", (string)null);
+                });
+
+            modelBuilder.Entity("StockPilot.Domain.Platform.JobRun", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("name");
+
+                    b.Property<int?>("LastDurationMs")
+                        .HasColumnType("integer")
+                        .HasColumnName("last_duration_ms");
+
+                    b.Property<DateTimeOffset?>("LastFinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_finished_at");
+
+                    b.Property<string>("LastMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("last_message");
+
+                    b.Property<DateTimeOffset?>("LastStartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_started_at");
+
+                    b.Property<bool?>("LastSucceeded")
+                        .HasColumnType("boolean")
+                        .HasColumnName("last_succeeded");
+
+                    b.HasKey("Name")
+                        .HasName("pk_job_runs");
+
+                    b.ToTable("job_runs", (string)null);
                 });
 
             modelBuilder.Entity("StockPilot.Domain.Purchasing.PurchaseOrder", b =>
